@@ -4,7 +4,6 @@ import {
   HelpCircle,
   Home,
   Languages,
-  ShieldCheck,
 } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useApp, useT } from '../../context/AppContext';
@@ -51,16 +50,16 @@ export function DashboardShell({ children }: { children: ReactNode }) {
   const showJourney = FLOW_STEPS.has(state.currentStep);
 
   return (
-    <div className="dash-surface flex min-h-screen">
-      <aside className="fixed inset-y-0 start-0 z-30 flex w-64 flex-col border-e border-slate-200/60 bg-white/95 backdrop-blur-sm">
-        <div className="border-b border-slate-100 px-5 py-5">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-brand-600 to-brand-800 text-sm font-bold text-white shadow-sm">
+    <div className="od-app grid min-h-screen grid-cols-[220px_1fr]">
+      <aside className="flex flex-col border-e border-[var(--od-border)] bg-[var(--od-surface)]">
+        <div className="border-b border-[var(--od-border)] px-4 py-4">
+          <div className="flex items-center gap-2.5 px-2 py-1">
+            <div className="flex h-8 w-8 items-center justify-center rounded-md bg-[var(--od-accent)] text-xs font-bold text-white">
               SOT
             </div>
             <div className="min-w-0">
-              <p className="truncate text-sm font-bold text-slate-900">{platformName}</p>
-              <p className="truncate text-[10px] uppercase tracking-wide text-slate-400">
+              <p className="truncate text-sm font-semibold text-[var(--od-heading)]">{platformName}</p>
+              <p className="truncate text-[10px] uppercase tracking-wide text-[var(--od-muted)]">
                 {t(`role.${state.currentRole}` as TranslationKey)}
               </p>
             </div>
@@ -76,42 +75,37 @@ export function DashboardShell({ children }: { children: ReactNode }) {
                 key={item.id}
                 type="button"
                 onClick={() => setStep(item.targetStep)}
-                className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all ${
-                  active
-                    ? 'border-s-[3px] border-brand-600 bg-brand-50 text-brand-700 shadow-sm'
-                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-                }`}
+                className={`od-nav-item ${active ? 'od-nav-item-active' : ''}`}
               >
-                <Icon className={`h-4 w-4 shrink-0 ${active ? 'text-brand-600' : 'text-slate-400'}`} />
+                <Icon className={`h-4 w-4 shrink-0 ${active ? 'text-[var(--od-accent)]' : 'text-[var(--od-muted)]'}`} />
                 {t(item.labelKey)}
               </button>
             );
           })}
         </nav>
-
-        <div className="border-t border-slate-100 p-4">
-          <div className="rounded-xl bg-gradient-to-br from-brand-900 to-brand-700 p-4 text-white">
-            <ShieldCheck className="mb-2 h-5 w-5 text-brand-200" />
-            <p className="text-xs font-medium leading-relaxed text-brand-50">
-              {t('dash.sidebar.promo')}
-            </p>
-          </div>
-        </div>
       </aside>
 
-      <div className="flex min-w-0 flex-1 flex-col ps-64">
-        <header className="sticky top-0 z-20 border-b border-slate-200/60 bg-white/80 backdrop-blur-xl">
-          <div className="flex items-center justify-between gap-4 px-6 py-3 lg:px-8">
-            <nav className="flex min-w-0 items-center gap-1.5 text-sm text-slate-500">
-              <Home className="h-3.5 w-3.5 shrink-0" />
-              <ChevronRight className="h-3.5 w-3.5 shrink-0 rtl:rotate-180" />
-              <span className="truncate font-medium text-slate-700">{t(meta.breadcrumbKey)}</span>
-            </nav>
+      <div className="flex min-w-0 flex-col">
+        <header className="sticky top-0 z-20 border-b border-[var(--od-border)] bg-[var(--od-surface)]/95 backdrop-blur-sm">
+          <div className="flex items-center justify-between gap-4 px-7 py-4">
+            <div className="min-w-0">
+              <nav className="mb-1 flex items-center gap-1.5 text-xs text-[var(--od-muted)]">
+                <Home className="h-3.5 w-3.5 shrink-0" />
+                <ChevronRight className="h-3.5 w-3.5 shrink-0 rtl:rotate-180" />
+                <span className="truncate">{t(meta.breadcrumbKey)}</span>
+              </nav>
+              <h1 className="truncate text-xl font-semibold tracking-[-0.01em] text-[var(--od-heading)]">
+                {t(meta.titleKey)}
+              </h1>
+              {meta.subtitleKey && (
+                <p className="mt-0.5 truncate text-sm text-[var(--od-muted)]">{t(meta.subtitleKey)}</p>
+              )}
+            </div>
 
-            <div className="flex shrink-0 items-center gap-2">
+            <div className="flex shrink-0 items-center gap-1">
               <button
                 type="button"
-                className="rounded-full p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+                className="rounded-md p-2 text-[var(--od-muted)] hover:bg-[var(--od-bg)]"
                 aria-label="Help"
               >
                 <HelpCircle className="h-4 w-4" />
@@ -119,7 +113,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
               <button
                 type="button"
                 onClick={() => setLanguage(state.language === 'ar' ? 'en' : 'ar')}
-                className="rounded-full p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+                className="rounded-md p-2 text-[var(--od-muted)] hover:bg-[var(--od-bg)]"
                 aria-label="Language"
               >
                 <Languages className="h-4 w-4" />
@@ -127,7 +121,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
               <button
                 type="button"
                 onClick={() => hasAlert && dismissDemoAlert()}
-                className="relative rounded-full p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+                className="relative rounded-md p-2 text-[var(--od-muted)] hover:bg-[var(--od-bg)]"
                 aria-label="Notifications"
               >
                 <Bell className="h-4 w-4" />
@@ -135,16 +129,16 @@ export function DashboardShell({ children }: { children: ReactNode }) {
                   <span className="absolute end-1.5 top-1.5 h-2 w-2 rounded-full bg-emerald-500 ring-2 ring-white" />
                 )}
               </button>
-              <div className="ms-2 flex items-center gap-2 border-s border-slate-200 ps-3">
+              <div className="ms-2 flex items-center gap-2 border-s border-[var(--od-border)] ps-3">
                 <div className="hidden text-end sm:block">
-                  <p className="max-w-[140px] truncate text-xs font-semibold text-slate-800">
+                  <p className="max-w-[140px] truncate text-xs font-semibold text-[var(--od-heading)]">
                     {personName}
                   </p>
-                  <p className="max-w-[140px] truncate text-[10px] text-slate-400" dir="ltr">
+                  <p className="max-w-[140px] truncate text-[10px] text-[var(--od-muted)]" dir="ltr">
                     {person?.mobile ?? '—'}
                   </p>
                 </div>
-                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-100 text-xs font-bold text-brand-700">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--od-accent-soft)] text-[10px] font-bold text-[var(--od-accent)]">
                   {initials}
                 </div>
               </div>
@@ -152,9 +146,9 @@ export function DashboardShell({ children }: { children: ReactNode }) {
           </div>
         </header>
 
-        <main className="flex-1 px-6 py-6 lg:px-8 lg:py-8">
+        <main className="flex-1 px-7 pb-14 pt-6">
           {showJourney && (
-            <div className="mb-6 dash-card px-4 py-3">
+            <div className="od-panel mb-6 px-4 py-3">
               <ProgressTracker variant="compact" />
             </div>
           )}

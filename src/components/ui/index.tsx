@@ -83,11 +83,11 @@ export function Card({
   className?: string;
 }) {
   return (
-    <div className={`rounded-xl border border-border bg-white shadow-sm ${className}`}>
+    <div className={`od-panel overflow-hidden ${className}`}>
       {(title || subtitle) && (
-        <div className="border-b border-border px-6 py-4">
-          {title && <h2 className="text-lg font-semibold text-slate-900">{title}</h2>}
-          {subtitle && <p className="mt-1 text-sm text-slate-600">{subtitle}</p>}
+        <div className="border-b border-[var(--od-border)] px-6 py-4">
+          {title && <h2 className="text-base font-medium text-[var(--od-heading)]">{title}</h2>}
+          {subtitle && <p className="mt-1 text-sm text-[var(--od-muted)]">{subtitle}</p>}
         </div>
       )}
       <div className="p-6">{children}</div>
@@ -111,8 +111,8 @@ export function Button({
   type?: 'button' | 'submit';
 }) {
   const variants = {
-    primary: 'bg-brand-600 text-white hover:bg-brand-700 disabled:bg-slate-300',
-    secondary: 'border border-border bg-white text-slate-700 hover:bg-slate-50',
+    primary: 'bg-[var(--od-accent)] text-white hover:bg-[var(--od-accent-hover)] disabled:bg-slate-300',
+    secondary: 'border border-[var(--od-border)] bg-white text-[var(--od-heading)] hover:bg-[var(--od-bg)]',
     danger: 'bg-danger text-white hover:bg-red-700',
     ghost: 'text-brand-600 hover:bg-brand-50',
   };

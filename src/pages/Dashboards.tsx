@@ -21,12 +21,13 @@ import { useApp, useT } from '../context/AppContext';
 import { StatusChip, Button } from '../components/ui';
 import { formatSAR } from '../utils/fees';
 import { AuditTrailPanel } from '../components/AuditTrail';
+import { DashboardPanel, KpiCard, QuickActionTile } from '../components/dashboard/DashboardPrimitives';
 import type { Transfer, TransferStatus } from '../types';
 import type { TranslationKey } from '../i18n/translations';
 
 function WaitingBanner({ message }: { message: string }) {
   return (
-    <div className="mb-4 flex items-start gap-3 dash-card border-amber-200/80 bg-gradient-to-r from-amber-50 to-white p-4 text-sm">
+    <div className="od-panel mb-4 flex items-start gap-3 border-amber-200/80 bg-amber-50/50 p-4 text-sm">
       <Clock className="mt-0.5 h-4 w-4 shrink-0 text-amber-700" />
       <p className="text-amber-900">{message}</p>
     </div>
@@ -60,65 +61,6 @@ function DemoNotification() {
   );
 }
 
-function DashboardWelcome({ firstName }: { firstName: string }) {
-  const t = useT();
-  return (
-    <div className="relative overflow-hidden dash-card bg-gradient-to-br from-brand-900 via-brand-800 to-brand-700 p-6 text-white">
-      <div className="pointer-events-none absolute -end-16 -top-16 h-48 w-48 rounded-full bg-white/10 blur-3xl" />
-      <div className="pointer-events-none absolute -bottom-8 start-1/3 h-32 w-32 rounded-full bg-brand-400/20 blur-2xl" />
-      <p className="relative text-sm font-medium text-brand-100">{t('dash.welcome.label')}</p>
-      <h2 className="relative mt-1 text-2xl font-bold tracking-tight">
-        {t('dash.greeting')}{' '}
-        <span className="text-brand-50">{firstName}</span>
-      </h2>
-      <p className="relative mt-2 max-w-xl text-sm leading-relaxed text-brand-100/90">
-        {t('dash.welcome.subtitle')}
-      </p>
-    </div>
-  );
-}
-
-function StatCard({
-  label,
-  value,
-  hint,
-  icon: Icon,
-  accent = 'brand',
-}: {
-  label: string;
-  value: string;
-  hint?: string;
-  icon: typeof PieChart;
-  accent?: 'brand' | 'success' | 'warning';
-}) {
-  const accentMap = {
-    brand: 'from-brand-500 to-brand-700',
-    success: 'from-emerald-500 to-emerald-700',
-    warning: 'from-amber-500 to-amber-700',
-  };
-  const iconBg = {
-    brand: 'bg-brand-50 text-brand-600',
-    success: 'bg-emerald-50 text-emerald-600',
-    warning: 'bg-amber-50 text-amber-600',
-  };
-
-  return (
-    <div className="relative overflow-hidden dash-card-interactive p-5">
-      <div className={`dash-stat-accent bg-gradient-to-b ${accentMap[accent]}`} />
-      <div className="flex items-start justify-between gap-3 ps-3">
-        <div>
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">{label}</p>
-          <p className="mt-2 text-2xl font-bold tracking-tight text-slate-900">{value}</p>
-          {hint && <p className="mt-1.5 text-xs text-slate-500">{hint}</p>}
-        </div>
-        <div className={`rounded-xl p-3 ${iconBg[accent]}`}>
-          <Icon className="h-5 w-5" />
-        </div>
-      </div>
-    </div>
-  );
-}
-
 function CertificateBanner({
   certificateId,
   companyName,
@@ -134,7 +76,7 @@ function CertificateBanner({
 }) {
   const t = useT();
   return (
-    <div className="relative overflow-hidden dash-card border-emerald-200/70 bg-gradient-to-br from-emerald-50/80 via-white to-brand-50/50 p-6">
+    <div className="od-panel relative overflow-hidden border-emerald-200/70 bg-emerald-50/30 p-6">
       <div className="pointer-events-none absolute -end-10 -top-10 h-36 w-36 rounded-full bg-emerald-100/50 blur-2xl" />
       <div className="relative flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-start gap-4">
@@ -158,33 +100,6 @@ function CertificateBanner({
         </Button>
       </div>
     </div>
-  );
-}
-
-function QuickAction({
-  label,
-  onClick,
-  icon: Icon,
-  primary = false,
-}: {
-  label: string;
-  onClick: () => void;
-  icon: typeof PieChart;
-  primary?: boolean;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`flex items-center gap-3 rounded-xl border p-4 text-start text-sm font-medium transition-all ${
-        primary
-          ? 'border-brand-200/80 bg-gradient-to-br from-brand-50 to-white text-brand-800 shadow-sm hover:border-brand-300 hover:shadow-md'
-          : 'dash-card-interactive text-slate-700 hover:text-slate-900'
-      }`}
-    >
-      <Icon className={`h-5 w-5 shrink-0 ${primary ? 'text-brand-600' : 'text-slate-400'}`} />
-      {label}
-    </button>
   );
 }
 
@@ -455,11 +370,7 @@ export function SellerDashboard() {
   const t = useT();
   const transfer = getActiveTransfer();
   const company = getCompany();
-  const person = state.persons[state.currentUserId];
   const locale = state.language === 'ar' ? 'ar-SA' : 'en-SA';
-  const firstName = person
-    ? (state.language === 'ar' ? person.nameAr : person.nameEn).split(' ')[0]
-    : '';
 
   const waitingBuyer = transfer?.status === 'buyer_pending';
   const waitingRofr = transfer?.status === 'rofr_active';
@@ -480,9 +391,7 @@ export function SellerDashboard() {
     transfer?.status === 'complete' && !!transfer.completionCertificateId;
 
   return (
-    <div className="space-y-6">
-      <DashboardWelcome firstName={firstName} />
-
+    <div className="space-y-7">
       <DemoNotification />
       {waitingBuyer && <WaitingBanner message={t('dashboard.seller.waiting_buyer')} />}
       {waitingRofr && <WaitingBanner message={t('dashboard.waiting_rofr')} />}
@@ -499,20 +408,20 @@ export function SellerDashboard() {
         />
       )}
 
-      <div className="grid gap-4 sm:grid-cols-3">
-        <StatCard
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <KpiCard
           label={t('dash.stat.portfolio')}
           value={formatSAR(portfolioValue, locale)}
           hint={company ? (state.language === 'ar' ? company.nameAr : company.nameEn) : undefined}
           icon={PieChart}
         />
-        <StatCard
+        <KpiCard
           label={t('dash.stat.active')}
           value={String(transfers.length)}
           hint={t('dash.stat.active_hint')}
           icon={ArrowLeftRight}
         />
-        <StatCard
+        <KpiCard
           label={t('dash.stat.proceeds')}
           value={transfer ? formatSAR(netProceeds, locale) : '—'}
           hint={t('dash.stat.proceeds_hint')}
@@ -521,29 +430,29 @@ export function SellerDashboard() {
       </div>
 
       <div>
-        <h2 className="mb-3 text-sm font-semibold text-slate-700">{t('dash.cta.quick_actions')}</h2>
+        <h2 className="mb-3 text-sm font-medium text-[var(--od-heading)]">{t('dash.cta.quick_actions')}</h2>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {!company?.wathqVerified && (
-            <QuickAction
+            <QuickActionTile
               label={t('dash.cta.register_company')}
               icon={Building2}
               onClick={() => setStep('company_kyb')}
               primary
             />
           )}
-          <QuickAction
+          <QuickActionTile
             label={t('dash.cta.new_transfer')}
             icon={PlusCircle}
             onClick={() => setStep('transfer_init')}
             primary={!!company?.wathqVerified}
           />
-          <QuickAction
+          <QuickActionTile
             label={t('dash.cta.view_transfers')}
             icon={ArrowLeftRight}
             onClick={() => setStep('seller_transfers')}
           />
           {canSign && (
-            <QuickAction
+            <QuickActionTile
               label={t('dashboard.action.sign')}
               icon={FileCheck}
               onClick={() => setStep('signing')}
@@ -551,7 +460,7 @@ export function SellerDashboard() {
             />
           )}
           {showCertificate && (
-            <QuickAction
+            <QuickActionTile
               label={t('dash.certificate.view')}
               icon={Award}
               onClick={() => setStep('complete')}
@@ -562,8 +471,7 @@ export function SellerDashboard() {
       </div>
 
       <div className="grid gap-6 xl:grid-cols-3">
-        <div className="dash-card p-5 xl:col-span-2">
-          <h3 className="mb-3 text-sm font-semibold text-slate-800">{t('dash.cta.active_transfer')}</h3>
+        <DashboardPanel title={t('dash.cta.active_transfer')} className="xl:col-span-2">
           {transfer && company ? (
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
@@ -585,15 +493,10 @@ export function SellerDashboard() {
           ) : (
             <p className="text-sm text-slate-500">{t('dash.cta.no_active')}</p>
           )}
-        </div>
-        <div className="dash-card">
-          <div className="border-b border-slate-100 px-5 py-3">
-            <h3 className="text-sm font-semibold text-slate-800">{t('nav.audit')}</h3>
-          </div>
-          <div className="p-4">
-            <AuditTrailPanel limit={5} compact />
-          </div>
-        </div>
+        </DashboardPanel>
+        <DashboardPanel title={t('nav.audit')}>
+          <AuditTrailPanel limit={5} compact />
+        </DashboardPanel>
       </div>
     </div>
   );
@@ -624,11 +527,11 @@ export function SellerTransfersPage() {
 
       <div className="grid gap-6 xl:grid-cols-3">
         <div className="xl:col-span-2">
-          <div className="overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-sm">
+          <div className="od-panel overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full min-w-[640px] text-sm">
                 <thead>
-                  <tr className="border-b border-slate-100 bg-slate-50/80 text-start text-xs font-medium uppercase tracking-wide text-slate-500">
+                  <tr className="border-b border-slate-100 bg-[var(--od-bg)]/80 text-start od-table-head">
                     <th className="px-5 py-3">{t('dash.table.ref')}</th>
                     <th className="px-5 py-3">{t('dashboard.seller.company')}</th>
                     <th className="px-5 py-3">{t('dashboard.seller.buyer')}</th>
@@ -729,7 +632,7 @@ export function SellerTransfersPage() {
         </div>
 
         <aside className="space-y-4">
-          <div className="rounded-xl border border-slate-200/80 bg-white p-5 shadow-sm">
+          <div className="od-panel p-5">
             <h3 className="mb-3 text-sm font-semibold text-slate-800">{t('dashboard.seller.holdings')}</h3>
             {company ? (
               <div className="space-y-2 text-sm">
@@ -744,7 +647,7 @@ export function SellerTransfersPage() {
             )}
           </div>
 
-          <div className="rounded-xl border border-slate-200/80 bg-white p-5 shadow-sm">
+          <div className="od-panel p-5">
             <h3 className="mb-3 text-sm font-semibold text-slate-800">{t('dashboard.seller.fees')}</h3>
             {transfer?.feeBreakdown ? (
               <dl className="space-y-2 text-sm">
@@ -766,7 +669,7 @@ export function SellerTransfersPage() {
             )}
           </div>
 
-          <div className="rounded-xl border border-slate-200/80 bg-white shadow-sm">
+          <div className="od-panel">
             <div className="border-b border-slate-100 px-5 py-3">
               <h3 className="text-sm font-semibold text-slate-800">{t('nav.audit')}</h3>
             </div>
@@ -784,11 +687,7 @@ export function BuyerDashboard() {
   const { state, getActiveTransfer, getPersonName, setStep } = useApp();
   const t = useT();
   const transfer = getActiveTransfer();
-  const person = state.persons[state.currentUserId];
   const locale = state.language === 'ar' ? 'ar-SA' : 'en-SA';
-  const firstName = person
-    ? (state.language === 'ar' ? person.nameAr : person.nameEn).split(' ')[0]
-    : '';
 
   const buyerOffers = Object.values(state.transfers).filter(
     (tr) => tr.buyerId === state.currentUserId
@@ -809,9 +708,7 @@ export function BuyerDashboard() {
     transfer?.status === 'complete' && !!transfer.completionCertificateId;
 
   return (
-    <div className="space-y-6">
-      <DashboardWelcome firstName={firstName} />
-
+    <div className="space-y-7">
       <DemoNotification />
       {transfer?.status === 'rofr_active' && (
         <WaitingBanner message={t('dashboard.waiting_rofr')} />
@@ -830,49 +727,46 @@ export function BuyerDashboard() {
         />
       )}
 
-      <div className="grid gap-4 sm:grid-cols-3">
-        <StatCard
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <KpiCard
           label={t('dash.stat.pending_offers')}
           value={String(pendingCount)}
           hint={t('dashboard.buyer.offers')}
           icon={TrendingUp}
-          accent="warning"
         />
-        <StatCard
+        <KpiCard
           label={t('dash.stat.investment')}
           value={transfer ? formatSAR(dealValue, locale) : '—'}
           hint={company ? (state.language === 'ar' ? company.nameAr : company.nameEn) : undefined}
           icon={PieChart}
-          accent="brand"
         />
-        <StatCard
+        <KpiCard
           label={t('dash.stat.buyer_fee')}
           value={formatSAR(0, locale)}
           hint={t('dash.stat.buyer_fee_hint')}
           icon={Wallet}
-          accent="success"
         />
       </div>
 
       <div>
-        <h2 className="mb-3 text-sm font-semibold text-slate-700">{t('dash.cta.quick_actions')}</h2>
+        <h2 className="mb-3 text-sm font-medium text-[var(--od-heading)]">{t('dash.cta.quick_actions')}</h2>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {canConfirm && (
-            <QuickAction
+            <QuickActionTile
               label={t('dash.cta.confirm_offer')}
               icon={FileCheck}
               onClick={() => setStep('buyer_confirm')}
               primary
             />
           )}
-          <QuickAction
+          <QuickActionTile
             label={t('dash.cta.view_offers')}
             icon={TrendingUp}
             onClick={() => setStep('buyer_offers')}
             primary={!canConfirm}
           />
           {canSign && (
-            <QuickAction
+            <QuickActionTile
               label={t('dashboard.action.sign')}
               icon={FileCheck}
               onClick={() => setStep('signing')}
@@ -880,7 +774,7 @@ export function BuyerDashboard() {
             />
           )}
           {canPay && (
-            <QuickAction
+            <QuickActionTile
               label={t('dashboard.action.pay')}
               icon={Wallet}
               onClick={() => setStep('escrow')}
@@ -888,7 +782,7 @@ export function BuyerDashboard() {
             />
           )}
           {showCertificate && (
-            <QuickAction
+            <QuickActionTile
               label={t('dash.certificate.view')}
               icon={Award}
               onClick={() => setStep('complete')}
@@ -899,8 +793,7 @@ export function BuyerDashboard() {
       </div>
 
       <div className="grid gap-6 xl:grid-cols-3">
-        <div className="dash-card p-5 xl:col-span-2">
-          <h3 className="mb-3 text-sm font-semibold text-slate-800">{t('dash.cta.active_transfer')}</h3>
+        <DashboardPanel title={t('dash.cta.active_transfer')} className="xl:col-span-2">
           {transfer && company ? (
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
@@ -920,15 +813,10 @@ export function BuyerDashboard() {
           ) : (
             <p className="text-sm text-slate-500">{t('dashboard.buyer.no_offers')}</p>
           )}
-        </div>
-        <div className="dash-card">
-          <div className="border-b border-slate-100 px-5 py-3">
-            <h3 className="text-sm font-semibold text-slate-800">{t('nav.audit')}</h3>
-          </div>
-          <div className="p-4">
-            <AuditTrailPanel limit={5} compact />
-          </div>
-        </div>
+        </DashboardPanel>
+        <DashboardPanel title={t('nav.audit')}>
+          <AuditTrailPanel limit={5} compact />
+        </DashboardPanel>
       </div>
     </div>
   );
@@ -964,11 +852,11 @@ export function BuyerOffersPage() {
 
       <div className="grid gap-6 xl:grid-cols-3">
         <div className="xl:col-span-2">
-          <div className="overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-sm">
+          <div className="od-panel overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full min-w-[640px] text-sm">
                 <thead>
-                  <tr className="border-b border-slate-100 bg-slate-50/80 text-start text-xs font-medium uppercase tracking-wide text-slate-500">
+                  <tr className="border-b border-slate-100 bg-[var(--od-bg)]/80 text-start od-table-head">
                     <th className="px-5 py-3">{t('dash.table.ref')}</th>
                     <th className="px-5 py-3">{t('dashboard.seller.company')}</th>
                     <th className="px-5 py-3">{t('dash.table.seller')}</th>
@@ -1101,7 +989,7 @@ export function BuyerOffersPage() {
         </div>
 
         <aside className="space-y-4">
-          <div className="rounded-xl border border-slate-200/80 bg-white p-5 shadow-sm">
+          <div className="od-panel p-5">
             <h3 className="mb-3 text-sm font-semibold text-slate-800">
               {t('dashboard.buyer.holdings')}
             </h3>
@@ -1139,7 +1027,7 @@ export function BuyerOffersPage() {
             )}
           </div>
 
-          <div className="rounded-xl border border-slate-200/80 bg-white p-5 shadow-sm">
+          <div className="od-panel p-5">
             <h3 className="mb-3 text-sm font-semibold text-slate-800">
               {t('dashboard.buyer.payment_summary')}
             </h3>
@@ -1181,7 +1069,7 @@ export function BuyerOffersPage() {
             )}
           </div>
 
-          <div className="rounded-xl border border-slate-200/80 bg-white shadow-sm">
+          <div className="od-panel">
             <div className="border-b border-slate-100 px-5 py-3">
               <h3 className="text-sm font-semibold text-slate-800">{t('nav.audit')}</h3>
             </div>
@@ -1213,10 +1101,10 @@ export function PlatformAdminPage() {
         </Button>
       )}
 
-      <div className="grid gap-4 sm:grid-cols-3">
-        <StatCard label={t('admin.transfers')} value={String(transfers.length)} icon={ArrowLeftRight} />
-        <StatCard label={t('nav.audit')} value={String(state.auditTrail.length)} icon={Bell} />
-        <StatCard
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <KpiCard label={t('admin.transfers')} value={String(transfers.length)} icon={ArrowLeftRight} />
+        <KpiCard label={t('nav.audit')} value={String(state.auditTrail.length)} icon={Bell} />
+        <KpiCard
           label="FO"
           value={String(transfers.filter((tr) => tr.fairnessOpinion).length)}
           icon={CheckCircle2}
@@ -1224,7 +1112,7 @@ export function PlatformAdminPage() {
       </div>
 
       <div className="grid gap-6 xl:grid-cols-3">
-        <div className="overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-sm xl:col-span-2">
+        <div className="od-panel overflow-hidden xl:col-span-2">
           <div className="border-b border-slate-100 px-5 py-4">
             <h3 className="font-semibold text-slate-800">{t('admin.transfers')}</h3>
           </div>
@@ -1257,7 +1145,7 @@ export function PlatformAdminPage() {
             </tbody>
           </table>
         </div>
-        <div className="rounded-xl border border-slate-200/80 bg-white p-5 shadow-sm">
+        <div className="od-panel p-5">
           <AuditTrailPanel limit={12} />
         </div>
       </div>

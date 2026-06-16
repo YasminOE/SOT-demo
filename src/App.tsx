@@ -83,7 +83,7 @@ function RoleFlow() {
 
   return (
     <>
-      {showHeader && (
+      {showHeader && !DASHBOARD_STEPS.has(currentStep) && (
         <PageHeader
           title={t(meta.titleKey)}
           subtitle={meta.subtitleKey ? t(meta.subtitleKey) : undefined}
