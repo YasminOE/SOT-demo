@@ -150,13 +150,22 @@ export function WathqResultPanel({
   );
 }
 
-export function WathqErrorPanel({ error }: { error: string }) {
+export function WathqErrorPanel({
+  error,
+  onRetry,
+  onDocumentFallback,
+}: {
+  error: string;
+  onRetry?: () => void;
+  onDocumentFallback?: () => void;
+}) {
   const t = useT();
   const messages: Record<string, string> = {
     NOT_FOUND: t('kyb.error.not_found'),
     INACTIVE: t('kyb.error.inactive'),
     NOT_ELIGIBLE: t('kyb.error.not_eligible'),
     IN_LIQUIDATION: t('kyb.error.liquidation'),
+    API_UNAVAILABLE: t('kyb.error.api_unavailable'),
   };
 
   return (
@@ -165,6 +174,20 @@ export function WathqErrorPanel({ error }: { error: string }) {
         <XCircle className="h-4 w-4" />
         {messages[error] ?? error}
       </div>
+      {(onRetry || onDocumentFallback) && (
+        <div className="mt-3 flex flex-wrap gap-2">
+          {onRetry && (
+            <Button variant="secondary" onClick={onRetry}>
+              {t('kyb.error.retry')}
+            </Button>
+          )}
+          {onDocumentFallback && (
+            <Button variant="secondary" onClick={onDocumentFallback}>
+              {t('kyb.fallback.use_documents')}
+            </Button>
+          )}
+        </div>
+      )}
     </div>
   );
 }

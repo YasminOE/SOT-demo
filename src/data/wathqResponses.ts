@@ -2,6 +2,8 @@ import type { WathqCommercialRegistration } from '../types/wathq';
 
 export const WATHQ_DEMO_CR_CLEAN = '1010123456';
 export const WATHQ_DEMO_CR_DISCREPANCY = '1010987654';
+export const WATHQ_DEMO_CR_NOT_IN_REGISTRY = '1010444444';
+export const WATHQ_DEMO_CR_API_FAIL = '1010222222';
 
 /** Active SJSC — eligible for SOT platform */
 export const wathqFutureTech: WathqCommercialRegistration = {
@@ -127,6 +129,18 @@ export const wathqFutureTech: WathqCommercialRegistration = {
     { id: '620101', name: { ar: 'تطوير البرمجيات', en: 'Software development' } },
     { id: '620102', name: { ar: 'استشارات تقنية المعلومات', en: 'IT consulting' } },
   ],
+};
+
+/** Active SJSC — seller not listed in Wathq parties (outdated MoCI records) */
+export const wathqNebulaVentures: WathqCommercialRegistration = {
+  ...wathqFutureTech,
+  crNationalNumber: '7009444444',
+  crNumber: WATHQ_DEMO_CR_NOT_IN_REGISTRY,
+  name: {
+    ar: 'شركة نيبولا للمساهمة المبسطة',
+    en: 'Nebula Ventures SJSC',
+  },
+  parties: wathqFutureTech.parties.filter((p) => p.identity.id !== '1087654321'),
 };
 
 export const wathqDigitalSolutions: WathqCommercialRegistration = {
@@ -290,5 +304,7 @@ export const wathqSuspendedLLC: WathqCommercialRegistration = {
 export const WATHQ_REGISTRY: Record<string, WathqCommercialRegistration> = {
   [WATHQ_DEMO_CR_CLEAN]: wathqFutureTech,
   [WATHQ_DEMO_CR_DISCREPANCY]: wathqDigitalSolutions,
+  [WATHQ_DEMO_CR_NOT_IN_REGISTRY]: wathqNebulaVentures,
+  [WATHQ_DEMO_CR_API_FAIL]: wathqFutureTech,
   '1010111111': wathqSuspendedLLC,
 };

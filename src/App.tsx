@@ -8,6 +8,7 @@ import { getStepMeta } from './components/dashboard/stepMeta';
 import { canRoleAccessStep, resolveRoleStep } from './flows/roleFlows';
 import { AuthPage } from './pages/AuthPage';
 import { CompanyKYBPage } from './pages/CompanyKYBPage';
+import { KybFallbackPage } from './pages/KybFallbackPage';
 import { DiscrepancyPage } from './pages/DiscrepancyPage';
 import { TransferInitPage } from './pages/TransferInitPage';
 import { FairnessOpinionPage } from './pages/FairnessOpinionPage';
@@ -24,6 +25,7 @@ import type { TransferStep } from './types';
 const PAGES: Record<TransferStep, React.ReactNode> = {
   auth: <AuthPage />,
   company_kyb: <CompanyKYBPage />,
+  kyb_fallback: <KybFallbackPage />,
   discrepancy: <DiscrepancyPage />,
   transfer_init: <TransferInitPage />,
   fairness_opinion: <FairnessOpinionPage />,

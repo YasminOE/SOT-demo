@@ -30,6 +30,7 @@ export function canRoleAccessStep(
   if (allowed.has(step)) return true;
   // Branch steps map to parent role step
   if (step === 'discrepancy' && role === 'seller') return true;
+  if (step === 'kyb_fallback' && role === 'seller') return true;
   if (step === 'seller_dashboard' && role === 'seller') return true;
   if (step === 'seller_transfers' && role === 'seller') return true;
   if (step === 'buyer_dashboard' && role === 'buyer') return true;
@@ -55,7 +56,7 @@ export function resolveRoleStep(state: AppState): TransferStep {
 
   switch (state.currentRole) {
     case 'seller':
-      return resolveSellerStep(person, company, transfer, state.foEnabled);
+      return resolveSellerStep(person, company, transfer, state.foEnabled, state);
     case 'buyer':
       return resolveBuyerStep(person, transfer);
     case 'company_admin':
@@ -73,10 +74,14 @@ function resolveSellerStep(
   person: AppState['persons'][string] | undefined,
   company: AppState['companies'][string] | undefined,
   transfer: Transfer | null,
-  _foEnabled: boolean
+  _foEnabled: boolean,
+  state: AppState
 ): TransferStep {
   if (!person?.identityVerified) return 'auth';
-  if (!company?.wathqVerified) return 'company_kyb';
+  if (!company?.wathqVerified) {
+    if (state.currentStep === 'kyb_fallback') return 'kyb_fallback';
+    return 'company_kyb';
+  }
   if (!transfer) return 'seller_dashboard';
   if (transfer.status === 'signing' && signingTurn(transfer, 'seller')) return 'signing';
   if (transfer.status === 'complete') return 'complete';

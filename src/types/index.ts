@@ -3,9 +3,13 @@ import type { TranslationKey } from '../i18n/translations';
 export type Language = 'ar' | 'en';
 export type Role = 'seller' | 'buyer' | 'company_admin' | 'platform_admin' | 'shareholder';
 export type MarketCondition = 'normal' | 'stress' | 'hot';
+export type KybDocumentType = 'share_certificate' | 'subscription_agreement' | 'board_resolution';
+export type KybVerificationMethod = 'wathq' | 'document_fallback';
+
 export type TransferStep =
   | 'auth'
   | 'company_kyb'
+  | 'kyb_fallback'
   | 'discrepancy'
   | 'transfer_init'
   | 'fairness_opinion'
@@ -72,6 +76,8 @@ export interface Company {
   referencePricePerShare: number;
   lastVerifiedAt?: string;
   wathqVerified: boolean;
+  kybVerificationMethod?: KybVerificationMethod;
+  kybFallbackDocument?: KybDocumentType;
   wathq: import('./wathq').WathqCommercialRegistration;
   shareholders: Shareholder[];
   adminId: string;
@@ -168,6 +174,8 @@ export interface AppState {
   transfers: Record<string, Transfer>;
   auditTrail: AuditEntry[];
   discrepancyResolved: boolean;
+  /** Seller-declared shares when Wathq has no matching partner (REG-03) */
+  kybClaimedShares: number | null;
   selectedCr: string;
   demoBranch: 'happy' | 'discrepancy' | 'price_out_of_range' | 'rofr_exercised' | 'declined_sign';
   /** Presenter-only: drives Jada band on FO — never seller-selected */

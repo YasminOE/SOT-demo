@@ -11,6 +11,7 @@ const ROLES: Role[] = ['seller', 'buyer', 'company_admin', 'platform_admin'];
 const STEP_KEYS: Partial<Record<TransferStep, import('../i18n/translations').TranslationKey>> = {
   auth: 'step.auth',
   company_kyb: 'step.company_kyb',
+  kyb_fallback: 'step.kyb_fallback',
   discrepancy: 'step.discrepancy',
   transfer_init: 'step.transfer_init',
   fairness_opinion: 'step.fairness_opinion',

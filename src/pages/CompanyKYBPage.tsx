@@ -3,23 +3,47 @@ import { Loader2 } from 'lucide-react';
 import { useApp, useT } from '../context/AppContext';
 import { Button, Card, Input } from '../components/ui';
 import { WathqErrorPanel, WathqResultPanel } from '../components/WathqResultPanel';
-import { lookupCommercialRegistration } from '../services/wathqMock';
 import {
+  getSellerWathqShares,
+  lookupCommercialRegistration,
+  sellerInWathqParties,
+} from '../services/wathqMock';
+import {
+  DEMO_CR_API_FAIL,
   DEMO_CR_CLEAN,
   DEMO_CR_DISCREPANCY,
   DEMO_CR_INELIGIBLE,
+  DEMO_CR_NOT_IN_REGISTRY,
   DEMO_SELLER_DISCREPANCY_ID,
 } from '../data/seed';
 import type { Company } from '../types';
 
 export function CompanyKYBPage() {
-  const { state, setCr, verifyWathq, setStep, logAudit } = useApp();
+  const { state, setCr, verifyWathq, setKybClaimedShares, setStep, logAudit } = useApp();
   const t = useT();
   const [cr, setCrLocal] = useState(state.selectedCr);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<Company | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [claimedShares, setClaimedShares] = useState('250000');
+
+  const sellerNidForCr = (crNumber: string) =>
+    crNumber === DEMO_CR_DISCREPANCY
+      ? state.persons[DEMO_SELLER_DISCREPANCY_ID]?.nationalId
+      : state.persons[state.currentUserId]?.nationalId;
+
+  const handleUseDocumentFallback = () => {
+    if (!state.companies[cr]) return;
+    const sellerClaim = parseInt(claimedShares, 10) || 250_000;
+    setKybClaimedShares(sellerClaim);
+    setError(null);
+    logAudit(
+      'kyb.api_fallback',
+      'Wathq unavailable — seller proceeding with document upload fallback',
+      cr
+    );
+    setStep('kyb_fallback');
+  };
 
   const handleLookup = async () => {
     setLoading(true);
@@ -43,13 +67,29 @@ export function CompanyKYBPage() {
       return;
     }
 
-    verifyWathq(cr);
     const company: Company = {
       ...seeded,
       wathq: response.data,
       lastVerifiedAt: new Date().toISOString(),
     };
-    setResult(company);
+
+    const sellerClaim = parseInt(claimedShares, 10);
+    const sellerNid = sellerNidForCr(cr);
+
+    if (sellerNid && !sellerInWathqParties(response.data, sellerNid)) {
+      setKybClaimedShares(sellerClaim);
+      logAudit(
+        'kyb.seller_not_in_wathq',
+        'Seller not found in Wathq parties — document fallback offered',
+        `${cr} · declared ${sellerClaim.toLocaleString()} shares`
+      );
+      setLoading(false);
+      setTimeout(() => setStep('kyb_fallback'), 400);
+      return;
+    }
+
+    setResult({ ...company, wathqVerified: true });
+    verifyWathq(cr);
     logAudit(
       'kyb.lookup',
       'Wathq Commercial Registration (New Legislation) lookup completed',
@@ -58,15 +98,7 @@ export function CompanyKYBPage() {
 
     setLoading(false);
 
-    const sellerClaim = parseInt(claimedShares, 10);
-    const sellerNid =
-      cr === DEMO_CR_DISCREPANCY
-        ? state.persons[DEMO_SELLER_DISCREPANCY_ID]?.nationalId
-        : state.persons[state.currentUserId]?.nationalId;
-    const wathqShares =
-      response.data.parties.find((p) => p.identity.id === sellerNid)?.partnerShare
-        ?.totalContributionCount ?? 0;
-
+    const wathqShares = sellerNid ? getSellerWathqShares(response.data, sellerNid) : 0;
     const hasDiscrepancy =
       state.demoBranch === 'discrepancy' ||
       (cr === DEMO_CR_DISCREPANCY && sellerClaim !== wathqShares);
@@ -95,8 +127,10 @@ export function CompanyKYBPage() {
           />
           <p className="text-xs text-slate-500">{t('kyb.demo_crs')}</p>
           <ul className="list-disc space-y-0.5 ps-4 text-xs text-slate-500">
-            <li dir="ltr">{DEMO_CR_CLEAN} — SJSC · Active · confirmed 2025-11-20</li>
-            <li dir="ltr">{DEMO_CR_DISCREPANCY} — SJSC · discrepancy branch</li>
+            <li dir="ltr">{DEMO_CR_CLEAN} — SJSC · Active · Wathq match</li>
+            <li dir="ltr">{DEMO_CR_DISCREPANCY} — SJSC · share count mismatch</li>
+            <li dir="ltr">{DEMO_CR_NOT_IN_REGISTRY} — SJSC · seller not in Wathq parties</li>
+            <li dir="ltr">{DEMO_CR_API_FAIL} — Wathq API fail (retry once) · then fallback</li>
             <li dir="ltr">{DEMO_CR_INELIGIBLE} — LLC · Suspended (ineligible)</li>
           </ul>
           <Button onClick={handleLookup} disabled={loading}>
@@ -109,8 +143,16 @@ export function CompanyKYBPage() {
             )}
           </Button>
 
-          {error && <WathqErrorPanel error={error} />}
-          {result && (
+          {error && (
+            <WathqErrorPanel
+              error={error}
+              onRetry={error === 'API_UNAVAILABLE' ? handleLookup : undefined}
+              onDocumentFallback={
+                error === 'API_UNAVAILABLE' ? handleUseDocumentFallback : undefined
+              }
+            />
+          )}
+          {result?.wathqVerified && (
             <WathqResultPanel company={result} onContinue={() => setStep('transfer_init')} />
           )}
         </div>
@@ -118,6 +160,7 @@ export function CompanyKYBPage() {
       <Card title={t('badge.wathq')}>
         <p className="text-sm text-slate-600">{t('badge.wathq.desc')}</p>
         <p className="mt-3 text-xs leading-relaxed text-slate-500">{t('kyb.eligibility_note')}</p>
+        <p className="mt-2 text-xs text-slate-500">{t('kyb.fallback.reg03_note')}</p>
         <p className="mt-2 text-xs text-slate-500">
           {t('kyb.source')}:{' '}
           <a

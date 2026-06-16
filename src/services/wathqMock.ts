@@ -1,10 +1,12 @@
 import type { Company, Shareholder } from '../types';
 import type { WathqCommercialRegistration, WathqLookupResult } from '../types/wathq';
-import { WATHQ_REGISTRY } from '../data/wathqResponses';
+import { WATHQ_REGISTRY, WATHQ_DEMO_CR_API_FAIL } from '../data/wathqResponses';
 import { DEMO_COMPANY_ADMIN_ID } from '../data/seed';
 
 /** SJSC + CJSC form IDs under MoCI new legislation */
 const ELIGIBLE_FORM_IDS = new Set([2041, 2042]);
+
+const apiFailAttempts = new Map<string, number>();
 
 export function isEligiblePrivateCompany(data: WathqCommercialRegistration): boolean {
   return ELIGIBLE_FORM_IDS.has(data.entityType.formId);
@@ -16,6 +18,23 @@ export function isCrActive(data: WathqCommercialRegistration): boolean {
     !data.inLiquidationProcess &&
     !data.status.suspensionDate &&
     !data.status.deletionDate
+  );
+}
+
+export function sellerInWathqParties(
+  data: WathqCommercialRegistration,
+  nationalId: string
+): boolean {
+  return data.parties.some((p) => p.identity.id === nationalId);
+}
+
+export function getSellerWathqShares(
+  data: WathqCommercialRegistration,
+  nationalId: string
+): number {
+  return (
+    data.parties.find((p) => p.identity.id === nationalId)?.partnerShare
+      ?.totalContributionCount ?? 0
   );
 }
 
@@ -67,6 +86,14 @@ export async function lookupCommercialRegistration(
 ): Promise<WathqLookupResult> {
   await new Promise((r) => setTimeout(r, 1200 + Math.random() * 1500));
 
+  if (crNumber === WATHQ_DEMO_CR_API_FAIL) {
+    const attempts = apiFailAttempts.get(crNumber) ?? 0;
+    if (attempts < 1) {
+      apiFailAttempts.set(crNumber, attempts + 1);
+      return { ok: false, error: 'API_UNAVAILABLE' };
+    }
+  }
+
   const data = WATHQ_REGISTRY[crNumber];
   if (!data) return { ok: false, error: 'NOT_FOUND' };
   if (data.inLiquidationProcess) return { ok: false, error: 'IN_LIQUIDATION' };
@@ -74,6 +101,10 @@ export async function lookupCommercialRegistration(
   if (!isEligiblePrivateCompany(data)) return { ok: false, error: 'NOT_ELIGIBLE' };
 
   return { ok: true, data };
+}
+
+export function resetWathqApiFailDemo(crNumber: string = WATHQ_DEMO_CR_API_FAIL): void {
+  apiFailAttempts.delete(crNumber);
 }
 
 export function localized(

@@ -18,6 +18,7 @@ import type {
   AuditEntry,
   DemoGuide,
   FairnessOpinion,
+  KybDocumentType,
   Language,
   Role,
   Transfer,
@@ -50,6 +51,8 @@ type Action =
   | { type: 'ADD_AUDIT'; entry: Omit<AuditEntry, 'id' | 'timestamp'> }
   | { type: 'VERIFY_IDENTITY'; personId: string }
   | { type: 'VERIFY_WATHQ'; crNumber: string }
+  | { type: 'VERIFY_KYB_FALLBACK'; crNumber: string; documentType: KybDocumentType; claimedShares: number }
+  | { type: 'SET_KYB_CLAIMED_SHARES'; shares: number | null }
   | { type: 'SET_CR'; crNumber: string }
   | { type: 'RESOLVE_DISCREPANCY' }
   | { type: 'CREATE_TRANSFER'; transfer: Transfer }
@@ -72,6 +75,7 @@ const initialState: AppState = {
   transfers: {},
   auditTrail: [],
   discrepancyResolved: false,
+  kybClaimedShares: null,
   selectedCr: DEMO_CR_CLEAN,
   demoBranch: 'happy',
   demoMarketCondition: 'normal',
@@ -147,11 +151,56 @@ function reducer(state: AppState, action: Action): AppState {
         companies[action.crNumber] = {
           ...companies[action.crNumber],
           wathqVerified: true,
+          kybVerificationMethod: 'wathq',
           lastVerifiedAt: new Date().toISOString(),
         };
       }
-      return { ...state, companies };
+      return { ...state, companies, kybClaimedShares: null };
     }
+    case 'VERIFY_KYB_FALLBACK': {
+      const companies = { ...state.companies };
+      const company = companies[action.crNumber];
+      const seller = state.persons[state.currentUserId];
+      if (!company || !seller) return state;
+
+      const totalShares = company.totalShares;
+      const percentage =
+        totalShares > 0
+          ? Math.round((action.claimedShares / totalShares) * 1000) / 10
+          : 0;
+      const sellerShareholder = {
+        id: `sh-fallback-${action.crNumber}`,
+        nameAr: seller.nameAr,
+        nameEn: seller.nameEn,
+        nationalId: seller.nationalId,
+        shares: action.claimedShares,
+        percentage,
+      };
+      const hasSeller = company.shareholders.some((sh) => sh.nationalId === seller.nationalId);
+
+      companies[action.crNumber] = {
+        ...company,
+        wathqVerified: true,
+        kybVerificationMethod: 'document_fallback',
+        kybFallbackDocument: action.documentType,
+        lastVerifiedAt: new Date().toISOString(),
+        shareholders: hasSeller
+          ? company.shareholders.map((sh) =>
+              sh.nationalId === seller.nationalId
+                ? { ...sh, shares: action.claimedShares, percentage }
+                : sh
+            )
+          : [...company.shareholders, sellerShareholder],
+      };
+
+      return {
+        ...state,
+        companies,
+        kybClaimedShares: action.claimedShares,
+      };
+    }
+    case 'SET_KYB_CLAIMED_SHARES':
+      return { ...state, kybClaimedShares: action.shares };
     case 'SET_CR':
       return { ...state, selectedCr: action.crNumber };
     case 'RESOLVE_DISCREPANCY':
@@ -208,6 +257,12 @@ interface AppContextValue {
   logAudit: (eventKey: string, event: string, details?: string) => void;
   verifyIdentity: (personId: string) => void;
   verifyWathq: (crNumber: string) => void;
+  verifyKybFallback: (params: {
+    crNumber: string;
+    documentType: KybDocumentType;
+    claimedShares: number;
+  }) => void;
+  setKybClaimedShares: (shares: number | null) => void;
   setCr: (crNumber: string) => void;
   resolveDiscrepancy: () => void;
   submitTransferInit: (params: {
@@ -292,6 +347,23 @@ export function AppProvider({ children }: { children: ReactNode }) {
     },
     [logAudit]
   );
+
+  const verifyKybFallback = useCallback(
+    (params: { crNumber: string; documentType: KybDocumentType; claimedShares: number }) => {
+      dispatch({ type: 'VERIFY_KYB_FALLBACK', ...params });
+      logAudit(
+        'kyb.document_fallback',
+        `Shareholding verified via uploaded ${params.documentType.replace(/_/g, ' ')}`,
+        `${params.crNumber} · ${params.claimedShares.toLocaleString()} shares (seller declaration)`
+      );
+      dispatch({ type: 'SET_DEMO_GUIDE', guide: guideAfterWathqVerified() });
+    },
+    [logAudit]
+  );
+
+  const setKybClaimedShares = useCallback((shares: number | null) => {
+    dispatch({ type: 'SET_KYB_CLAIMED_SHARES', shares });
+  }, []);
 
   const setCr = useCallback((crNumber: string) => {
     dispatch({ type: 'SET_CR', crNumber });
@@ -627,6 +699,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       logAudit,
       verifyIdentity,
       verifyWathq,
+      verifyKybFallback,
+      setKybClaimedShares,
       setCr,
       resolveDiscrepancy,
       createTransfer,
@@ -659,6 +733,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       logAudit,
       verifyIdentity,
       verifyWathq,
+      verifyKybFallback,
+      setKybClaimedShares,
       setCr,
       resolveDiscrepancy,
       createTransfer,

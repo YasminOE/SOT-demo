@@ -107,6 +107,13 @@ export interface WathqCommercialRegistration {
   activities: Array<{ id: string; name: WathqLocalized }>;
 }
 
+export type WathqLookupError =
+  | 'NOT_FOUND'
+  | 'INACTIVE'
+  | 'NOT_ELIGIBLE'
+  | 'IN_LIQUIDATION'
+  | 'API_UNAVAILABLE';
+
 export type WathqLookupResult =
   | { ok: true; data: WathqCommercialRegistration }
-  | { ok: false; error: 'NOT_FOUND' | 'INACTIVE' | 'NOT_ELIGIBLE' | 'IN_LIQUIDATION' };
+  | { ok: false; error: WathqLookupError };

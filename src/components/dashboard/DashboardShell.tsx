@@ -10,6 +10,7 @@ import type { TranslationKey } from '../../i18n/translations';
 
 const FLOW_STEPS = new Set([
   'company_kyb',
+  'kyb_fallback',
   'discrepancy',
   'transfer_init',
   'fairness_opinion',

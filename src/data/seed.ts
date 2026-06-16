@@ -3,8 +3,10 @@ import { mapWathqToCompany } from '../services/wathqMock';
 import {
   WATHQ_DEMO_CR_CLEAN,
   WATHQ_DEMO_CR_DISCREPANCY,
+  WATHQ_DEMO_CR_NOT_IN_REGISTRY,
   wathqDigitalSolutions,
   wathqFutureTech,
+  wathqNebulaVentures,
 } from './wathqResponses';
 
 export const DEMO_SELLER_ID = 'seller-1';
@@ -14,6 +16,8 @@ export const DEMO_ROFR_SHAREHOLDER_ID = 'sh-3';
 export const DEMO_COMPANY_ADMIN_ID = 'admin-1';
 export const DEMO_CR_CLEAN = WATHQ_DEMO_CR_CLEAN;
 export const DEMO_CR_DISCREPANCY = WATHQ_DEMO_CR_DISCREPANCY;
+export const DEMO_CR_NOT_IN_REGISTRY = WATHQ_DEMO_CR_NOT_IN_REGISTRY;
+export const DEMO_CR_API_FAIL = '1010222222';
 export const DEMO_CR_INELIGIBLE = '1010111111';
 
 export const seedPersons: Record<string, Person> = {
@@ -69,6 +73,8 @@ function attachShareholderIds(company: Company, ids: string[]): Company {
   };
 }
 
+const nebulaShareholderIds = ['sh-n1', 'sh-n2', 'sh-n3', 'sh-n4'];
+
 export const seedCompanies: Record<string, Company> = {
   [DEMO_CR_CLEAN]: attachShareholderIds(
     mapWathqToCompany(wathqFutureTech, 100, 2019),
@@ -77,6 +83,14 @@ export const seedCompanies: Record<string, Company> = {
   [DEMO_CR_DISCREPANCY]: attachShareholderIds(
     mapWathqToCompany(wathqDigitalSolutions, 85, 2021),
     digitalShareholderIds
+  ),
+  [DEMO_CR_NOT_IN_REGISTRY]: attachShareholderIds(
+    mapWathqToCompany(wathqNebulaVentures, 95, 2020),
+    nebulaShareholderIds
+  ),
+  [DEMO_CR_API_FAIL]: attachShareholderIds(
+    mapWathqToCompany(wathqFutureTech, 100, 2019),
+    futureTechShareholderIds
   ),
 };
 

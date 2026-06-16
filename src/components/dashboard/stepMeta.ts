@@ -14,6 +14,11 @@ const META: Partial<Record<TransferStep, StepMeta>> = {
     subtitleKey: 'dash.subtitle.company',
     breadcrumbKey: 'step.company_kyb',
   },
+  kyb_fallback: {
+    titleKey: 'step.kyb_fallback',
+    subtitleKey: 'dash.subtitle.company',
+    breadcrumbKey: 'step.kyb_fallback',
+  },
   discrepancy: {
     titleKey: 'step.discrepancy',
     subtitleKey: 'dash.subtitle.company',

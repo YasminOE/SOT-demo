@@ -6,6 +6,7 @@ import type { TransferStep } from '../types';
 const STEP_KEYS: Record<TransferStep, import('../i18n/translations').TranslationKey> = {
   auth: 'step.auth',
   company_kyb: 'step.company_kyb',
+  kyb_fallback: 'step.kyb_fallback',
   discrepancy: 'step.discrepancy',
   transfer_init: 'step.transfer_init',
   fairness_opinion: 'step.fairness_opinion',
@@ -27,7 +28,7 @@ export function ProgressTracker({ variant = 'default' }: { variant?: 'default' |
   const t = useT();
   const steps = getRoleSteps(state.currentRole, state.foEnabled);
   const displayStep =
-    state.currentStep === 'discrepancy'
+    state.currentStep === 'discrepancy' || state.currentStep === 'kyb_fallback'
       ? 'company_kyb'
       : state.currentStep === 'seller_dashboard' ||
           state.currentStep === 'seller_transfers' ||

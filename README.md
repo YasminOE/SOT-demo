@@ -14,7 +14,7 @@ Open the URL shown in the terminal (typically `http://localhost:5173`).
 ## Demo walkthrough
 
 1. **Seller registration** — OTP → Nafath KYC (enter the 2-digit code shown)
-2. **Company KYB** — Wathq lookup with CR `1010123456` (clean) or `1010987654` (discrepancy branch)
+2. **Company KYB** — Wathq lookup with CR `1010123456` (clean), `1010987654` (discrepancy), `1010444444` (seller not in Wathq → document fallback), or `1010222222` (API fail → retry/fallback)
 3. **Transfer initiation** — price, shares, market condition, fee + VAT breakdown
 4. **Fairness Opinion** — reference-price validation with secondary-market discount bands (no NAV)
 5. **Buyer confirmation** — Nafath auth, SAR 0 platform fee
@@ -50,8 +50,10 @@ React 19 · TypeScript · Vite · Tailwind CSS 4 · In-memory state · Mock API 
 
 | CR | Type | Status | Notes |
 |----|------|--------|-------|
-| `1010123456` | SJSC (مساهمة مبسطة) | Active · confirmed 2025-11-20 | Happy path |
+| `1010123456` | SJSC (مساهمة مبسطة) | Active · confirmed 2025-11-20 | Happy path — Wathq match |
 | `1010987654` | SJSC | Active | Discrepancy branch |
+| `1010444444` | SJSC | Active | Seller not in Wathq parties → REG-03 document fallback |
+| `1010222222` | SJSC | Active | First lookup fails (API) · retry succeeds · or document fallback |
 | `1010111111` | LLC | Suspended | Rejected — ineligible + inactive |
 
 Mock responses follow [Wathq Commercial Registration (New Legislation)](https://developer.wathq.sa/en/api/31) field structure: `crNumber`, `crNationalNumber`, `entityType`, `status`, `parties`, `management`, `capital.stockCapital`, etc.

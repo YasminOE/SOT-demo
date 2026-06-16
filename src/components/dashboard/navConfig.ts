@@ -41,7 +41,7 @@ const SELLER_NAV: NavItem[] = [
     labelKey: 'nav.company',
     icon: Building2,
     targetStep: 'company_kyb',
-    activeSteps: ['company_kyb', 'discrepancy'],
+    activeSteps: ['company_kyb', 'kyb_fallback', 'discrepancy'],
   },
   {
     id: 'new',
