@@ -14,6 +14,8 @@ import {
   Building2,
   PlusCircle,
   FileCheck,
+  Award,
+  Download,
 } from 'lucide-react';
 import { useApp, useT } from '../context/AppContext';
 import { StatusChip, Button } from '../components/ui';
@@ -24,7 +26,7 @@ import type { TranslationKey } from '../i18n/translations';
 
 function WaitingBanner({ message }: { message: string }) {
   return (
-    <div className="mb-4 flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm">
+    <div className="mb-4 flex items-start gap-3 dash-card border-amber-200/80 bg-gradient-to-r from-amber-50 to-white p-4 text-sm">
       <Clock className="mt-0.5 h-4 w-4 shrink-0 text-amber-700" />
       <p className="text-amber-900">{message}</p>
     </div>
@@ -58,28 +60,102 @@ function DemoNotification() {
   );
 }
 
+function DashboardWelcome({ firstName }: { firstName: string }) {
+  const t = useT();
+  return (
+    <div className="relative overflow-hidden dash-card bg-gradient-to-br from-brand-900 via-brand-800 to-brand-700 p-6 text-white">
+      <div className="pointer-events-none absolute -end-16 -top-16 h-48 w-48 rounded-full bg-white/10 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-8 start-1/3 h-32 w-32 rounded-full bg-brand-400/20 blur-2xl" />
+      <p className="relative text-sm font-medium text-brand-100">{t('dash.welcome.label')}</p>
+      <h2 className="relative mt-1 text-2xl font-bold tracking-tight">
+        {t('dash.greeting')}{' '}
+        <span className="text-brand-50">{firstName}</span>
+      </h2>
+      <p className="relative mt-2 max-w-xl text-sm leading-relaxed text-brand-100/90">
+        {t('dash.welcome.subtitle')}
+      </p>
+    </div>
+  );
+}
+
 function StatCard({
   label,
   value,
   hint,
   icon: Icon,
+  accent = 'brand',
 }: {
   label: string;
   value: string;
   hint?: string;
   icon: typeof PieChart;
+  accent?: 'brand' | 'success' | 'warning';
 }) {
+  const accentMap = {
+    brand: 'from-brand-500 to-brand-700',
+    success: 'from-emerald-500 to-emerald-700',
+    warning: 'from-amber-500 to-amber-700',
+  };
+  const iconBg = {
+    brand: 'bg-brand-50 text-brand-600',
+    success: 'bg-emerald-50 text-emerald-600',
+    warning: 'bg-amber-50 text-amber-600',
+  };
+
   return (
-    <div className="rounded-xl border border-slate-200/80 bg-white p-5 shadow-sm">
-      <div className="flex items-start justify-between gap-3">
+    <div className="relative overflow-hidden dash-card-interactive p-5">
+      <div className={`dash-stat-accent bg-gradient-to-b ${accentMap[accent]}`} />
+      <div className="flex items-start justify-between gap-3 ps-3">
         <div>
-          <p className="text-xs font-medium uppercase tracking-wide text-slate-400">{label}</p>
-          <p className="mt-2 text-2xl font-bold text-slate-900">{value}</p>
-          {hint && <p className="mt-1 text-xs text-slate-500">{hint}</p>}
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">{label}</p>
+          <p className="mt-2 text-2xl font-bold tracking-tight text-slate-900">{value}</p>
+          {hint && <p className="mt-1.5 text-xs text-slate-500">{hint}</p>}
         </div>
-        <div className="rounded-lg bg-brand-50 p-2.5">
-          <Icon className="h-5 w-5 text-brand-600" />
+        <div className={`rounded-xl p-3 ${iconBg[accent]}`}>
+          <Icon className="h-5 w-5" />
         </div>
+      </div>
+    </div>
+  );
+}
+
+function CertificateBanner({
+  certificateId,
+  companyName,
+  shares,
+  locale,
+  onView,
+}: {
+  certificateId: string;
+  companyName: string;
+  shares: number;
+  locale: string;
+  onView: () => void;
+}) {
+  const t = useT();
+  return (
+    <div className="relative overflow-hidden dash-card border-emerald-200/70 bg-gradient-to-br from-emerald-50/80 via-white to-brand-50/50 p-6">
+      <div className="pointer-events-none absolute -end-10 -top-10 h-36 w-36 rounded-full bg-emerald-100/50 blur-2xl" />
+      <div className="relative flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-start gap-4">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-700 text-white shadow-sm">
+            <Award className="h-6 w-6" />
+          </div>
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wider text-emerald-700">
+              {t('dash.certificate.ready')}
+            </p>
+            <p className="mt-1 font-semibold text-slate-900">{companyName}</p>
+            <p className="mt-0.5 font-mono text-sm text-brand-700">{certificateId}</p>
+            <p className="mt-1 text-xs text-slate-500">
+              {shares.toLocaleString(locale)} {t('transfer.shares').toLowerCase()}
+            </p>
+          </div>
+        </div>
+        <Button onClick={onView} className="gap-2 shadow-sm">
+          <Download className="h-4 w-4" />
+          {t('dash.certificate.view')}
+        </Button>
       </div>
     </div>
   );
@@ -100,10 +176,10 @@ function QuickAction({
     <button
       type="button"
       onClick={onClick}
-      className={`flex items-center gap-3 rounded-xl border p-4 text-start text-sm font-medium transition-colors ${
+      className={`flex items-center gap-3 rounded-xl border p-4 text-start text-sm font-medium transition-all ${
         primary
-          ? 'border-brand-200 bg-brand-50 text-brand-800 hover:bg-brand-100'
-          : 'border-slate-200/80 bg-white text-slate-700 hover:bg-slate-50'
+          ? 'border-brand-200/80 bg-gradient-to-br from-brand-50 to-white text-brand-800 shadow-sm hover:border-brand-300 hover:shadow-md'
+          : 'dash-card-interactive text-slate-700 hover:text-slate-900'
       }`}
     >
       <Icon className={`h-5 w-5 shrink-0 ${primary ? 'text-brand-600' : 'text-slate-400'}`} />
@@ -400,19 +476,27 @@ export function SellerDashboard() {
   const activeStatusLabel = transfer
     ? statusLabelForRole(transfer.status, 'seller', t)
     : null;
+  const showCertificate =
+    transfer?.status === 'complete' && !!transfer.completionCertificateId;
 
   return (
     <div className="space-y-6">
-      <p className="text-lg text-slate-600">
-        {t('dash.greeting')}{' '}
-        <span className="font-semibold text-slate-900">{firstName}</span>
-      </p>
+      <DashboardWelcome firstName={firstName} />
 
       <DemoNotification />
       {waitingBuyer && <WaitingBanner message={t('dashboard.seller.waiting_buyer')} />}
       {waitingRofr && <WaitingBanner message={t('dashboard.waiting_rofr')} />}
       {transfer?.status === 'signing' && sellerSigned && (
         <WaitingBanner message={t('dashboard.waiting_signing')} />
+      )}
+      {showCertificate && company && transfer.completionCertificateId && (
+        <CertificateBanner
+          certificateId={transfer.completionCertificateId}
+          companyName={state.language === 'ar' ? company.nameAr : company.nameEn}
+          shares={transfer.shares}
+          locale={locale}
+          onView={() => setStep('complete')}
+        />
       )}
 
       <div className="grid gap-4 sm:grid-cols-3">
@@ -466,11 +550,19 @@ export function SellerDashboard() {
               primary
             />
           )}
+          {showCertificate && (
+            <QuickAction
+              label={t('dash.certificate.view')}
+              icon={Award}
+              onClick={() => setStep('complete')}
+              primary
+            />
+          )}
         </div>
       </div>
 
       <div className="grid gap-6 xl:grid-cols-3">
-        <div className="rounded-xl border border-slate-200/80 bg-white p-5 shadow-sm xl:col-span-2">
+        <div className="dash-card p-5 xl:col-span-2">
           <h3 className="mb-3 text-sm font-semibold text-slate-800">{t('dash.cta.active_transfer')}</h3>
           {transfer && company ? (
             <div className="flex flex-wrap items-center justify-between gap-4">
@@ -494,7 +586,7 @@ export function SellerDashboard() {
             <p className="text-sm text-slate-500">{t('dash.cta.no_active')}</p>
           )}
         </div>
-        <div className="rounded-xl border border-slate-200/80 bg-white shadow-sm">
+        <div className="dash-card">
           <div className="border-b border-slate-100 px-5 py-3">
             <h3 className="text-sm font-semibold text-slate-800">{t('nav.audit')}</h3>
           </div>
@@ -713,13 +805,12 @@ export function BuyerDashboard() {
   const activeStatusLabel = transfer
     ? statusLabelForRole(transfer.status, 'buyer', t)
     : null;
+  const showCertificate =
+    transfer?.status === 'complete' && !!transfer.completionCertificateId;
 
   return (
     <div className="space-y-6">
-      <p className="text-lg text-slate-600">
-        {t('dash.greeting')}{' '}
-        <span className="font-semibold text-slate-900">{firstName}</span>
-      </p>
+      <DashboardWelcome firstName={firstName} />
 
       <DemoNotification />
       {transfer?.status === 'rofr_active' && (
@@ -729,6 +820,15 @@ export function BuyerDashboard() {
         <WaitingBanner message={t('dashboard.waiting_signing')} />
       )}
       {canPay && <WaitingBanner message={t('dashboard.waiting_escrow')} />}
+      {showCertificate && company && transfer.completionCertificateId && (
+        <CertificateBanner
+          certificateId={transfer.completionCertificateId}
+          companyName={state.language === 'ar' ? company.nameAr : company.nameEn}
+          shares={transfer.shares}
+          locale={locale}
+          onView={() => setStep('complete')}
+        />
+      )}
 
       <div className="grid gap-4 sm:grid-cols-3">
         <StatCard
@@ -736,18 +836,21 @@ export function BuyerDashboard() {
           value={String(pendingCount)}
           hint={t('dashboard.buyer.offers')}
           icon={TrendingUp}
+          accent="warning"
         />
         <StatCard
           label={t('dash.stat.investment')}
           value={transfer ? formatSAR(dealValue, locale) : '—'}
           hint={company ? (state.language === 'ar' ? company.nameAr : company.nameEn) : undefined}
           icon={PieChart}
+          accent="brand"
         />
         <StatCard
           label={t('dash.stat.buyer_fee')}
           value={formatSAR(0, locale)}
           hint={t('dash.stat.buyer_fee_hint')}
           icon={Wallet}
+          accent="success"
         />
       </div>
 
@@ -784,11 +887,19 @@ export function BuyerDashboard() {
               primary
             />
           )}
+          {showCertificate && (
+            <QuickAction
+              label={t('dash.certificate.view')}
+              icon={Award}
+              onClick={() => setStep('complete')}
+              primary
+            />
+          )}
         </div>
       </div>
 
       <div className="grid gap-6 xl:grid-cols-3">
-        <div className="rounded-xl border border-slate-200/80 bg-white p-5 shadow-sm xl:col-span-2">
+        <div className="dash-card p-5 xl:col-span-2">
           <h3 className="mb-3 text-sm font-semibold text-slate-800">{t('dash.cta.active_transfer')}</h3>
           {transfer && company ? (
             <div className="flex flex-wrap items-center justify-between gap-4">
@@ -810,7 +921,7 @@ export function BuyerDashboard() {
             <p className="text-sm text-slate-500">{t('dashboard.buyer.no_offers')}</p>
           )}
         </div>
-        <div className="rounded-xl border border-slate-200/80 bg-white shadow-sm">
+        <div className="dash-card">
           <div className="border-b border-slate-100 px-5 py-3">
             <h3 className="text-sm font-semibold text-slate-800">{t('nav.audit')}</h3>
           </div>
@@ -944,6 +1055,15 @@ export function BuyerOffersPage() {
                               >
                                 {t('dashboard.action.pay')}
                               </Button>
+                            ) : tr.status === 'complete' && tr.completionCertificateId ? (
+                              <Button
+                                variant="ghost"
+                                className="!px-2 !py-1 !text-xs"
+                                onClick={() => setStep('complete')}
+                              >
+                                <Award className="me-1 inline h-3.5 w-3.5" />
+                                {t('dash.certificate.view')}
+                              </Button>
                             ) : (
                               <button
                                 type="button"
@@ -992,7 +1112,25 @@ export function BuyerOffersPage() {
                 <p className="text-slate-500">
                   {transfer.shares.toLocaleString(locale)} @ {formatSAR(transfer.pricePerShare, locale)}
                 </p>
-                {transfer.status === 'complete' && (
+                {transfer.status === 'complete' && transfer.completionCertificateId && (
+                  <div className="mt-3 space-y-2 rounded-xl border border-emerald-200/70 bg-emerald-50/50 p-3">
+                    <div className="flex items-center gap-2 text-emerald-700">
+                      <Award className="h-4 w-4" />
+                      <span className="text-xs font-semibold uppercase tracking-wide">
+                        {t('dash.certificate.ready')}
+                      </span>
+                    </div>
+                    <p className="font-mono text-xs text-brand-700">{transfer.completionCertificateId}</p>
+                    <Button
+                      variant="secondary"
+                      className="w-full !py-1.5 !text-xs"
+                      onClick={() => setStep('complete')}
+                    >
+                      {t('dash.certificate.view')}
+                    </Button>
+                  </div>
+                )}
+                {transfer.status === 'complete' && !transfer.completionCertificateId && (
                   <StatusChip status={t('status.transfer.complete')} variant="success" />
                 )}
               </div>

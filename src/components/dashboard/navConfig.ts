@@ -7,6 +7,7 @@ import {
   Shield,
   Wallet,
   ClipboardList,
+  Award,
   type LucideIcon,
 } from 'lucide-react';
 import type { Role, TransferStep } from '../../types';
@@ -123,17 +124,36 @@ const ADMIN_NAV: NavItem[] = [
   },
 ];
 
-export function getNavForRole(role: Role): NavItem[] {
+const CERTIFICATE_NAV: NavItem = {
+  id: 'certificate',
+  labelKey: 'nav.certificate',
+  icon: Award,
+  targetStep: 'complete',
+  activeSteps: ['complete'],
+};
+
+export function getNavForRole(role: Role, transferComplete = false): NavItem[] {
+  let nav: NavItem[];
   switch (role) {
     case 'seller':
-      return SELLER_NAV;
+      nav = SELLER_NAV;
+      break;
     case 'buyer':
-      return BUYER_NAV;
+      nav = BUYER_NAV;
+      break;
     case 'company_admin':
-      return COMPANY_NAV;
+      nav = COMPANY_NAV;
+      break;
     case 'platform_admin':
-      return ADMIN_NAV;
+      nav = ADMIN_NAV;
+      break;
     default:
-      return SELLER_NAV;
+      nav = SELLER_NAV;
   }
+
+  if (transferComplete && (role === 'buyer' || role === 'seller')) {
+    return [...nav, CERTIFICATE_NAV];
+  }
+
+  return nav;
 }

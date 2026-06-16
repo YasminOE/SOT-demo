@@ -28,10 +28,12 @@ const FLOW_STEPS = new Set([
 ]);
 
 export function DashboardShell({ children }: { children: ReactNode }) {
-  const { state, setLanguage, setStep, dismissDemoAlert } = useApp();
+  const { state, setLanguage, setStep, dismissDemoAlert, getActiveTransfer } = useApp();
   const t = useT();
   const person = state.persons[state.currentUserId];
-  const nav = getNavForRole(state.currentRole);
+  const transfer = getActiveTransfer();
+  const transferComplete = transfer?.status === 'complete' && !!transfer.completionCertificateId;
+  const nav = getNavForRole(state.currentRole, transferComplete);
   const meta = getStepMeta(state.currentStep, state.currentRole);
   const platformName = state.language === 'ar' ? PLATFORM_NAME_AR : PLATFORM_NAME_EN;
   const personName = person
@@ -49,11 +51,11 @@ export function DashboardShell({ children }: { children: ReactNode }) {
   const showJourney = FLOW_STEPS.has(state.currentStep);
 
   return (
-    <div className="flex min-h-screen bg-[#eef1f5]">
-      <aside className="fixed inset-y-0 start-0 z-30 flex w-60 flex-col border-e border-slate-200/80 bg-white">
+    <div className="dash-surface flex min-h-screen">
+      <aside className="fixed inset-y-0 start-0 z-30 flex w-64 flex-col border-e border-slate-200/60 bg-white/95 backdrop-blur-sm">
         <div className="border-b border-slate-100 px-5 py-5">
-          <div className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-600 text-sm font-bold text-white">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-brand-600 to-brand-800 text-sm font-bold text-white shadow-sm">
               SOT
             </div>
             <div className="min-w-0">
@@ -74,9 +76,9 @@ export function DashboardShell({ children }: { children: ReactNode }) {
                 key={item.id}
                 type="button"
                 onClick={() => setStep(item.targetStep)}
-                className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
+                className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all ${
                   active
-                    ? 'border-s-[3px] border-brand-600 bg-brand-50 text-brand-700'
+                    ? 'border-s-[3px] border-brand-600 bg-brand-50 text-brand-700 shadow-sm'
                     : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
                 }`}
               >
@@ -97,8 +99,8 @@ export function DashboardShell({ children }: { children: ReactNode }) {
         </div>
       </aside>
 
-      <div className="flex min-w-0 flex-1 flex-col ps-60">
-        <header className="sticky top-0 z-20 border-b border-slate-200/80 bg-white/90 backdrop-blur-md">
+      <div className="flex min-w-0 flex-1 flex-col ps-64">
+        <header className="sticky top-0 z-20 border-b border-slate-200/60 bg-white/80 backdrop-blur-xl">
           <div className="flex items-center justify-between gap-4 px-6 py-3 lg:px-8">
             <nav className="flex min-w-0 items-center gap-1.5 text-sm text-slate-500">
               <Home className="h-3.5 w-3.5 shrink-0" />
@@ -152,7 +154,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
 
         <main className="flex-1 px-6 py-6 lg:px-8 lg:py-8">
           {showJourney && (
-            <div className="mb-6 rounded-xl border border-slate-200/80 bg-white px-4 py-3 shadow-sm">
+            <div className="mb-6 dash-card px-4 py-3">
               <ProgressTracker variant="compact" />
             </div>
           )}
