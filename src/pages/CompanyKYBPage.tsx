@@ -103,7 +103,7 @@ export function CompanyKYBPage() {
       state.demoBranch === 'discrepancy' ||
       (cr === DEMO_CR_DISCREPANCY && sellerClaim !== wathqShares);
 
-    if (hasDiscrepancy && cr === DEMO_CR_DISCREPANCY) {
+    if (hasDiscrepancy) {
       setTimeout(() => setStep('discrepancy'), 500);
     }
   };

@@ -28,7 +28,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
   const person = state.persons[state.currentUserId];
   const transfer = getActiveTransfer();
   const transferComplete = transfer?.status === 'complete' && !!transfer.completionCertificateId;
-  const nav = getNavForRole(state.currentRole, transferComplete);
+  const nav = getNavForRole(state.currentRole, transferComplete, state.foEnabled);
   const meta = getStepMeta(state.currentStep, state.currentRole);
   const platformName = state.language === 'ar' ? PLATFORM_NAME_AR : PLATFORM_NAME_EN;
   const personName = person

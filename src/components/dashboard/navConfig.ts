@@ -132,7 +132,11 @@ const CERTIFICATE_NAV: NavItem = {
   activeSteps: ['complete'],
 };
 
-export function getNavForRole(role: Role, transferComplete = false): NavItem[] {
+export function getNavForRole(
+  role: Role,
+  transferComplete = false,
+  foEnabled = false
+): NavItem[] {
   let nav: NavItem[];
   switch (role) {
     case 'seller':
@@ -145,7 +149,7 @@ export function getNavForRole(role: Role, transferComplete = false): NavItem[] {
       nav = COMPANY_NAV;
       break;
     case 'platform_admin':
-      nav = ADMIN_NAV;
+      nav = foEnabled ? ADMIN_NAV : ADMIN_NAV.filter((item) => item.id !== 'fo');
       break;
     default:
       nav = SELLER_NAV;

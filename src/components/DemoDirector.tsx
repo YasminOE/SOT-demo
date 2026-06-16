@@ -112,7 +112,6 @@ export function DemoDirector() {
                 [
                   ['happy', 'branch.happy'],
                   ['discrepancy', 'branch.discrepancy'],
-                  ['price_out_of_range', 'branch.price_out'],
                   ['rofr_exercised', 'branch.rofr'],
                   ['declined_sign', 'branch.decline'],
                 ] as const

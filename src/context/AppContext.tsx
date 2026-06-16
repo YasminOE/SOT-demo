@@ -41,6 +41,8 @@ import {
   validatePrice,
 } from '../utils/fairnessOpinion';
 import { calculateFees } from '../utils/fees';
+import { applyDemoBranch } from '../utils/demoBranchSetup';
+import { resetWathqApiFailDemo } from '../services/wathqMock';
 import { resolveRoleStep } from '../flows/roleFlows';
 import { t as translate, type TranslationKey } from '../i18n/translations';
 
@@ -58,6 +60,7 @@ type Action =
   | { type: 'CREATE_TRANSFER'; transfer: Transfer }
   | { type: 'UPDATE_TRANSFER'; id: string; patch: Partial<Transfer> }
   | { type: 'SET_DEMO_BRANCH'; branch: AppState['demoBranch'] }
+  | { type: 'APPLY_DEMO_BRANCH'; branch: AppState['demoBranch'] }
   | { type: 'SET_FO_ENABLED'; enabled: boolean }
   | { type: 'SYNC_ROLE_STEP' }
   | { type: 'SET_DEMO_GUIDE'; guide: AppState['demoGuide'] }
@@ -224,6 +227,8 @@ function reducer(state: AppState, action: Action): AppState {
     }
     case 'SET_DEMO_BRANCH':
       return { ...state, demoBranch: action.branch };
+    case 'APPLY_DEMO_BRANCH':
+      return applyDemoBranch(state, action.branch);
     case 'SET_FO_ENABLED':
       return { ...state, foEnabled: action.enabled };
     case 'SYNC_ROLE_STEP':
@@ -636,8 +641,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const triggerBranch = useCallback(
     (branch: AppState['demoBranch']) => {
-      dispatch({ type: 'SET_DEMO_BRANCH', branch });
-      logAudit('demo.branch', `Demo branch triggered: ${branch}`);
+      resetWathqApiFailDemo();
+      dispatch({ type: 'APPLY_DEMO_BRANCH', branch });
+      logAudit('demo.branch', `Demo branch applied: ${branch}`);
     },
     [logAudit]
   );

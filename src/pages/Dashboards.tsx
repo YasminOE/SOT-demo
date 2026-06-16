@@ -1019,37 +1019,23 @@ export function BuyerOffersPage() {
 }
 
 export function PlatformAdminPage() {
-  const { state, getActiveTransfer, setStep } = useApp();
+  const { state } = useApp();
   const t = useT();
   const transfers = Object.values(state.transfers);
-  const active = getActiveTransfer();
-  const foPending =
-    state.foEnabled &&
-    active &&
-    (active.status === 'fo_pending' || active.status === 'fo_flagged');
-
-  const foPendingCount = transfers.filter(
-    (tr) => tr.status === 'fo_pending' || tr.status === 'fo_flagged'
-  ).length;
+  const foIssuedCount = transfers.filter((tr) => tr.fairnessOpinion).length;
 
   return (
     <div className="space-y-6">
-      {foPending && (
-        <Button onClick={() => setStep('fairness_opinion')}>
-          {t('step.fairness_opinion')} — {active.id}
-        </Button>
-      )}
-
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         <KpiCard label={t('admin.transfers')} value={String(transfers.length)} icon={ArrowLeftRight} />
         <KpiCard
-          label={t('status.transfer.fo_pending')}
-          value={String(foPendingCount)}
+          label={t('admin.fo_issued')}
+          value={String(foIssuedCount)}
           icon={FileCheck}
         />
         <KpiCard
-          label="FO"
-          value={String(transfers.filter((tr) => tr.fairnessOpinion).length)}
+          label={t('status.transfer.complete')}
+          value={String(transfers.filter((tr) => tr.status === 'complete').length)}
           icon={CheckCircle2}
         />
       </div>
