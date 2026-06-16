@@ -1,8 +1,8 @@
-import { Clock, ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useApp, useT } from '../context/AppContext';
 import { getRoleSteps } from '../flows/roleFlows';
-import type { MarketCondition, Role, TransferStep } from '../types';
+import type { Role, TransferStep } from '../types';
 import { Button } from './ui';
 
 const ROLES: Role[] = ['seller', 'buyer', 'company_admin', 'platform_admin'];
@@ -30,10 +30,7 @@ export function DemoDirector() {
   const {
     state,
     setRole,
-    fastForwardRoFR,
     triggerBranch,
-    setDemoMarket,
-    setFoEnabled,
     jumpToStep,
     simulateBuyerAcceptance,
   } = useApp();
@@ -89,24 +86,6 @@ export function DemoDirector() {
           </div>
 
           <div>
-            <label className="mb-1 block opacity-70">{t('demo.fo_toggle')}</label>
-            <div className="flex gap-1">
-              <button
-                onClick={() => setFoEnabled(true)}
-                className={`rounded px-2 py-1 ${state.foEnabled ? 'bg-amber-400 text-brand-900' : 'bg-brand-700 hover:bg-brand-600'}`}
-              >
-                {t('demo.fo_on')}
-              </button>
-              <button
-                onClick={() => setFoEnabled(false)}
-                className={`rounded px-2 py-1 ${!state.foEnabled ? 'bg-amber-400 text-brand-900' : 'bg-brand-700 hover:bg-brand-600'}`}
-              >
-                {t('demo.fo_off')}
-              </button>
-            </div>
-          </div>
-
-          <div>
             <label className="mb-1 block opacity-70">{t('demo.simulate_buyer')}</label>
             <Button
               variant="secondary"
@@ -121,41 +100,6 @@ export function DemoDirector() {
             >
               {t('demo.simulate_buyer')}
             </Button>
-          </div>
-
-          <div>
-            <label className="mb-1 block opacity-70">{t('demo.fast_forward')}</label>
-            <div className="flex gap-1">
-              <Button
-                variant="secondary"
-                className="!px-2 !py-1 !text-xs"
-                onClick={() => fastForwardRoFR(14)}
-              >
-                <Clock className="me-1 h-3 w-3" /> Day 15
-              </Button>
-              <Button
-                variant="secondary"
-                className="!px-2 !py-1 !text-xs"
-                onClick={() => fastForwardRoFR(29)}
-              >
-                Day 30
-              </Button>
-            </div>
-          </div>
-
-          <div>
-            <label className="mb-1 block opacity-70">{t('demo.market_context')}</label>
-            <div className="flex flex-wrap gap-1">
-              {(['normal', 'stress', 'hot'] as MarketCondition[]).map((m) => (
-                <button
-                  key={m}
-                  onClick={() => setDemoMarket(m)}
-                  className={`rounded px-2 py-1 ${state.demoMarketCondition === m ? 'bg-amber-400 text-brand-900' : 'bg-brand-700 hover:bg-brand-600'}`}
-                >
-                  {t(`market.${m}` as import('../i18n/translations').TranslationKey)}
-                </button>
-              ))}
-            </div>
           </div>
 
           <div>

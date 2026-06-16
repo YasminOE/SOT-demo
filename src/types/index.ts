@@ -171,7 +171,6 @@ export interface AppState {
 
 export interface DemoDirectorActions {
   switchRole: (role: Role) => void;
-  fastForwardRoFR: (days: number) => void;
   triggerBranch: (branch: AppState['demoBranch']) => void;
   jumpToStep: (step: TransferStep) => void;
 }

@@ -18,7 +18,6 @@ import type {
   AuditEntry,
   FairnessOpinion,
   Language,
-  MarketCondition,
   Role,
   Transfer,
   TransferStep,
@@ -46,11 +45,9 @@ type Action =
   | { type: 'CREATE_TRANSFER'; transfer: Transfer }
   | { type: 'UPDATE_TRANSFER'; id: string; patch: Partial<Transfer> }
   | { type: 'SET_DEMO_BRANCH'; branch: AppState['demoBranch'] }
-  | { type: 'SET_DEMO_MARKET'; condition: MarketCondition }
   | { type: 'SET_FO_ENABLED'; enabled: boolean }
   | { type: 'SYNC_ROLE_STEP' }
   | { type: 'SET_DEMO_ALERT'; alert: AppState['demoAlert'] }
-  | { type: 'FAST_FORWARD_ROFR'; days: number }
   | { type: 'WAIVE_ROFR'; crNumber: string; shareholderId: string }
   | { type: 'INIT_DEMO' };
 
@@ -166,27 +163,12 @@ function reducer(state: AppState, action: Action): AppState {
     }
     case 'SET_DEMO_BRANCH':
       return { ...state, demoBranch: action.branch };
-    case 'SET_DEMO_MARKET':
-      return { ...state, demoMarketCondition: action.condition };
     case 'SET_FO_ENABLED':
       return { ...state, foEnabled: action.enabled };
     case 'SYNC_ROLE_STEP':
       return { ...state, currentStep: resolveRoleStep(state) };
     case 'SET_DEMO_ALERT':
       return { ...state, demoAlert: action.alert };
-    case 'FAST_FORWARD_ROFR': {
-      const id = state.activeTransferId;
-      if (!id || !state.transfers[id]) return state;
-      const transfer = state.transfers[id];
-      const newDay = Math.min(30, transfer.rofrDay + action.days);
-      return {
-        ...state,
-        transfers: {
-          ...state.transfers,
-          [id]: { ...transfer, rofrDay: newDay },
-        },
-      };
-    }
     case 'WAIVE_ROFR': {
       const companies = { ...state.companies };
       const company = companies[action.crNumber];
@@ -222,7 +204,6 @@ interface AppContextValue {
     relatedParty: boolean;
     forceOutOfRange?: boolean;
   }) => void;
-  setFoEnabled: (enabled: boolean) => void;
   syncRoleStep: () => void;
   updateTransfer: (id: string, patch: Partial<Transfer>) => void;
   issueFairnessOpinion: (justification?: string) => void;
@@ -233,9 +214,7 @@ interface AppContextValue {
   signDocument: (party: 'seller' | 'company' | 'buyer') => void;
   fundEscrow: () => void;
   completeMoci: () => void;
-  fastForwardRoFR: (days: number) => void;
   triggerBranch: (branch: AppState['demoBranch']) => void;
-  setDemoMarket: (condition: MarketCondition) => void;
   jumpToStep: (step: TransferStep) => void;
   simulateBuyerAcceptance: () => void;
   dismissDemoAlert: () => void;
@@ -307,14 +286,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     dispatch({ type: 'RESOLVE_DISCREPANCY' });
     logAudit('kyb.discrepancy', 'Shareholding discrepancy reconciled via board resolution');
   }, [logAudit]);
-
-  const setFoEnabled = useCallback(
-    (enabled: boolean) => {
-      dispatch({ type: 'SET_FO_ENABLED', enabled });
-      logAudit('demo.fo_toggle', enabled ? 'Fairness Opinion step shown' : 'Fairness Opinion step hidden');
-    },
-    [logAudit]
-  );
 
   const syncRoleStep = useCallback(() => {
     dispatch({ type: 'SYNC_ROLE_STEP' });
@@ -572,26 +543,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     );
   }, [getActiveTransfer, updateTransfer, logAudit]);
 
-  const fastForwardRoFR = useCallback(
-    (days: number) => {
-      dispatch({ type: 'FAST_FORWARD_ROFR', days });
-      logAudit('demo.rofr_fast_forward', `ROFR clock advanced by ${days} days`);
-    },
-    [logAudit]
-  );
-
   const triggerBranch = useCallback(
     (branch: AppState['demoBranch']) => {
       dispatch({ type: 'SET_DEMO_BRANCH', branch });
       logAudit('demo.branch', `Demo branch triggered: ${branch}`);
-    },
-    [logAudit]
-  );
-
-  const setDemoMarket = useCallback(
-    (condition: MarketCondition) => {
-      dispatch({ type: 'SET_DEMO_MARKET', condition });
-      logAudit('demo.market', `Demo FO market context set: ${condition}`);
     },
     [logAudit]
   );
@@ -660,10 +615,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       signDocument,
       fundEscrow,
       completeMoci,
-      fastForwardRoFR,
       triggerBranch,
-      setDemoMarket,
-      setFoEnabled,
       syncRoleStep,
       jumpToStep,
       simulateBuyerAcceptance,
@@ -693,10 +645,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       signDocument,
       fundEscrow,
       completeMoci,
-      fastForwardRoFR,
       triggerBranch,
-      setDemoMarket,
-      setFoEnabled,
       syncRoleStep,
       jumpToStep,
       simulateBuyerAcceptance,
