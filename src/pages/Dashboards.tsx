@@ -2,8 +2,6 @@ import {
   Wallet,
   TrendingUp,
   Clock,
-  Bell,
-  X,
   CheckCircle2,
   Circle,
   ArrowLeftRight,
@@ -20,7 +18,6 @@ import {
 import { useApp, useT } from '../context/AppContext';
 import { StatusChip, Button } from '../components/ui';
 import { formatSAR } from '../utils/fees';
-import { AuditTrailPanel } from '../components/AuditTrail';
 import { DashboardPanel, KpiCard, QuickActionTile } from '../components/dashboard/DashboardPrimitives';
 import type { Transfer, TransferStatus } from '../types';
 import type { TranslationKey } from '../i18n/translations';
@@ -30,33 +27,6 @@ function WaitingBanner({ message }: { message: string }) {
     <div className="od-panel mb-4 flex items-start gap-3 bg-[rgba(255,149,0,0.08)] p-4">
       <Clock className="mt-0.5 h-[18px] w-[18px] shrink-0 text-[var(--apple-orange)]" strokeWidth={1.75} />
       <p className="text-[14px] tracking-[-0.01em] text-[var(--apple-text)]">{message}</p>
-    </div>
-  );
-}
-
-function DemoNotification() {
-  const { state, dismissDemoAlert } = useApp();
-  const t = useT();
-  const alert = state.demoAlert;
-
-  if (!alert || alert.role !== state.currentRole) return null;
-
-  const message = t(alert.messageKey as TranslationKey).replace('{buyer}', alert.buyerName ?? '');
-
-  return (
-    <div className="od-panel mb-4 flex items-start gap-3 bg-[rgba(52,199,89,0.08)] p-4">
-      <Bell className="mt-0.5 h-[18px] w-[18px] shrink-0 text-[var(--apple-green)]" strokeWidth={1.75} />
-      <div className="flex-1">
-        <p className="text-[14px] font-semibold tracking-[-0.01em] text-[var(--apple-text)]">{t('notification.title')}</p>
-        <p className="apple-subhead mt-1">{message}</p>
-      </div>
-      <button
-        onClick={dismissDemoAlert}
-        className="flex h-8 w-8 items-center justify-center rounded-full text-[var(--apple-text-secondary)] hover:bg-[var(--apple-fill-secondary)]"
-        aria-label="Dismiss"
-      >
-        <X className="h-4 w-4" />
-      </button>
     </div>
   );
 }
@@ -389,7 +359,6 @@ export function SellerDashboard() {
 
   return (
     <div className="space-y-7">
-      <DemoNotification />
       {waitingBuyer && <WaitingBanner message={t('dashboard.seller.waiting_buyer')} />}
       {waitingRofr && <WaitingBanner message={t('dashboard.waiting_rofr')} />}
       {transfer?.status === 'signing' && sellerSigned && (
@@ -467,8 +436,7 @@ export function SellerDashboard() {
         </div>
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-3">
-        <DashboardPanel title={t('dash.cta.active_transfer')} className="xl:col-span-2">
+      <DashboardPanel title={t('dash.cta.active_transfer')}>
           {transfer && company ? (
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
@@ -490,11 +458,7 @@ export function SellerDashboard() {
           ) : (
             <p className="text-sm text-slate-500">{t('dash.cta.no_active')}</p>
           )}
-        </DashboardPanel>
-        <DashboardPanel title={t('nav.audit')}>
-          <AuditTrailPanel limit={5} compact />
-        </DashboardPanel>
-      </div>
+      </DashboardPanel>
     </div>
   );
 }
@@ -515,7 +479,6 @@ export function SellerTransfersPage() {
 
   return (
     <div className="space-y-6">
-      <DemoNotification />
       {waitingBuyer && <WaitingBanner message={t('dashboard.seller.waiting_buyer')} />}
       {waitingRofr && <WaitingBanner message={t('dashboard.waiting_rofr')} />}
       {canSign && (
@@ -665,15 +628,6 @@ export function SellerTransfersPage() {
               <p className="text-sm text-slate-400">—</p>
             )}
           </div>
-
-          <div className="od-panel">
-            <div className="border-b border-slate-100 px-5 py-3">
-              <h3 className="text-sm font-semibold text-slate-800">{t('nav.audit')}</h3>
-            </div>
-            <div className="p-4">
-              <AuditTrailPanel limit={5} compact />
-            </div>
-          </div>
         </aside>
       </div>
     </div>
@@ -706,7 +660,6 @@ export function BuyerDashboard() {
 
   return (
     <div className="space-y-7">
-      <DemoNotification />
       {transfer?.status === 'rofr_active' && (
         <WaitingBanner message={t('dashboard.waiting_rofr')} />
       )}
@@ -789,8 +742,7 @@ export function BuyerDashboard() {
         </div>
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-3">
-        <DashboardPanel title={t('dash.cta.active_transfer')} className="xl:col-span-2">
+      <DashboardPanel title={t('dash.cta.active_transfer')}>
           {transfer && company ? (
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
@@ -810,11 +762,7 @@ export function BuyerDashboard() {
           ) : (
             <p className="text-sm text-slate-500">{t('dashboard.buyer.no_offers')}</p>
           )}
-        </DashboardPanel>
-        <DashboardPanel title={t('nav.audit')}>
-          <AuditTrailPanel limit={5} compact />
-        </DashboardPanel>
-      </div>
+      </DashboardPanel>
     </div>
   );
 }
@@ -841,7 +789,6 @@ export function BuyerOffersPage() {
 
   return (
     <div className="space-y-6">
-      <DemoNotification />
       {transfer?.status === 'rofr_active' && (
         <WaitingBanner message={t('dashboard.waiting_rofr')} />
       )}
@@ -1065,15 +1012,6 @@ export function BuyerOffersPage() {
               <p className="text-sm text-slate-400">—</p>
             )}
           </div>
-
-          <div className="od-panel">
-            <div className="border-b border-slate-100 px-5 py-3">
-              <h3 className="text-sm font-semibold text-slate-800">{t('nav.audit')}</h3>
-            </div>
-            <div className="p-4">
-              <AuditTrailPanel limit={5} compact />
-            </div>
-          </div>
         </aside>
       </div>
     </div>
@@ -1090,6 +1028,10 @@ export function PlatformAdminPage() {
     active &&
     (active.status === 'fo_pending' || active.status === 'fo_flagged');
 
+  const foPendingCount = transfers.filter(
+    (tr) => tr.status === 'fo_pending' || tr.status === 'fo_flagged'
+  ).length;
+
   return (
     <div className="space-y-6">
       {foPending && (
@@ -1098,9 +1040,13 @@ export function PlatformAdminPage() {
         </Button>
       )}
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         <KpiCard label={t('admin.transfers')} value={String(transfers.length)} icon={ArrowLeftRight} />
-        <KpiCard label={t('nav.audit')} value={String(state.auditTrail.length)} icon={Bell} />
+        <KpiCard
+          label={t('status.transfer.fo_pending')}
+          value={String(foPendingCount)}
+          icon={FileCheck}
+        />
         <KpiCard
           label="FO"
           value={String(transfers.filter((tr) => tr.fairnessOpinion).length)}
@@ -1108,8 +1054,7 @@ export function PlatformAdminPage() {
         />
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-3">
-        <div className="od-panel overflow-hidden xl:col-span-2">
+      <div className="od-panel overflow-hidden">
           <div className="border-b border-slate-100 px-5 py-4">
             <h3 className="font-semibold text-slate-800">{t('admin.transfers')}</h3>
           </div>
@@ -1141,10 +1086,6 @@ export function PlatformAdminPage() {
               )}
             </tbody>
           </table>
-        </div>
-        <div className="od-panel p-5">
-          <AuditTrailPanel limit={12} />
-        </div>
       </div>
     </div>
   );

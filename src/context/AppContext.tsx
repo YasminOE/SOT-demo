@@ -16,12 +16,22 @@ import {
 import type {
   AppState,
   AuditEntry,
+  DemoGuide,
   FairnessOpinion,
   Language,
   Role,
   Transfer,
   TransferStep,
 } from '../types';
+import {
+  guideAfterBuyerConfirm,
+  guideAfterEscrowFunded,
+  guideAfterFoIssued,
+  guideAfterSigning,
+  guideAfterTransferComplete,
+  guideAfterTransferInit,
+  guideAfterWathqVerified,
+} from '../utils/demoGuide';
 import {
   generateCertificateId,
   generateFOReference,
@@ -47,7 +57,7 @@ type Action =
   | { type: 'SET_DEMO_BRANCH'; branch: AppState['demoBranch'] }
   | { type: 'SET_FO_ENABLED'; enabled: boolean }
   | { type: 'SYNC_ROLE_STEP' }
-  | { type: 'SET_DEMO_ALERT'; alert: AppState['demoAlert'] }
+  | { type: 'SET_DEMO_GUIDE'; guide: AppState['demoGuide'] }
   | { type: 'WAIVE_ROFR'; crNumber: string; shareholderId: string }
   | { type: 'INIT_DEMO' };
 
@@ -66,7 +76,7 @@ const initialState: AppState = {
   demoBranch: 'happy',
   demoMarketCondition: 'normal',
   foEnabled: false,
-  demoAlert: null,
+  demoGuide: null,
 };
 
 function addAudit(
@@ -105,6 +115,8 @@ function reducer(state: AppState, action: Action): AppState {
         ...state,
         currentRole: action.role,
         currentUserId: action.userId ?? roleUserMap[action.role],
+        demoGuide:
+          state.demoGuide?.switchToRole === action.role ? null : state.demoGuide,
       };
       return { ...next, currentStep: resolveRoleStep(next) };
     }
@@ -167,8 +179,8 @@ function reducer(state: AppState, action: Action): AppState {
       return { ...state, foEnabled: action.enabled };
     case 'SYNC_ROLE_STEP':
       return { ...state, currentStep: resolveRoleStep(state) };
-    case 'SET_DEMO_ALERT':
-      return { ...state, demoAlert: action.alert };
+    case 'SET_DEMO_GUIDE':
+      return { ...state, demoGuide: action.guide };
     case 'WAIVE_ROFR': {
       const companies = { ...state.companies };
       const company = companies[action.crNumber];
@@ -217,7 +229,9 @@ interface AppContextValue {
   triggerBranch: (branch: AppState['demoBranch']) => void;
   jumpToStep: (step: TransferStep) => void;
   simulateBuyerAcceptance: () => void;
-  dismissDemoAlert: () => void;
+  setDemoGuide: (guide: DemoGuide | null) => void;
+  followDemoGuide: () => void;
+  dismissDemoGuide: () => void;
   getActiveTransfer: () => Transfer | null;
   getPersonName: (id: string) => string;
   getCompany: (cr?: string) => (typeof seedCompanies)[string] | undefined;
@@ -274,6 +288,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     (crNumber: string) => {
       dispatch({ type: 'VERIFY_WATHQ', crNumber });
       logAudit('kyb.wathq', 'Wathq company verification completed', crNumber);
+      dispatch({ type: 'SET_DEMO_GUIDE', guide: guideAfterWathqVerified() });
     },
     [logAudit]
   );
@@ -378,6 +393,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
         fo.inRange ? 'Fairness Opinion issued' : 'Price flagged outside validation range',
         fo.referenceNumber
       );
+      if (fo.inRange || justification) {
+        dispatch({ type: 'SET_DEMO_GUIDE', guide: guideAfterFoIssued() });
+      }
     },
     [getActiveTransfer, state.companies, lang, updateTransfer, logAudit]
   );
@@ -424,8 +442,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
       if (!state.foEnabled) {
         issueFairnessOpinion(undefined, transfer);
         logAudit('fo.silent', 'Price validation completed (FO step hidden)');
+        dispatch({ type: 'SET_DEMO_GUIDE', guide: guideAfterTransferInit(false) });
       } else {
         logAudit('fo.queued', 'Transfer queued for Fairness Opinion — switch to Platform Admin');
+        dispatch({ type: 'SET_DEMO_GUIDE', guide: guideAfterTransferInit(true) });
       }
       dispatch({ type: 'SET_STEP', step: 'seller_dashboard' });
     },
@@ -443,19 +463,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const acceptBuyerOffer = useCallback(() => {
     const transfer = getActiveTransfer();
     if (!transfer) return;
-    const buyer = state.persons[transfer.buyerId];
-    const buyerName = lang === 'ar' ? buyer?.nameAr : buyer?.nameEn;
     updateTransfer(transfer.id, { status: 'rofr_active' });
     logAudit('buyer.accepted', 'Buyer confirmed agreed price and accepted offer');
-    dispatch({
-      type: 'SET_DEMO_ALERT',
-      alert: {
-        role: 'seller',
-        messageKey: 'notification.buyer_confirmed',
-        buyerName: buyerName ?? transfer.buyerId,
-      },
-    });
-  }, [getActiveTransfer, state.persons, lang, updateTransfer, logAudit]);
+    dispatch({ type: 'SET_DEMO_GUIDE', guide: guideAfterBuyerConfirm() });
+  }, [getActiveTransfer, updateTransfer, logAudit]);
 
   const startRoFR = useCallback(() => {
     const transfer = getActiveTransfer();
@@ -504,11 +515,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
           : s
       );
       const allSigned = signatures.every((s) => s.status === 'signed');
-      updateTransfer(transfer.id, {
+      const updatedTransfer: Transfer = {
+        ...transfer,
         signatures,
         status: allSigned ? 'escrow_pending' : 'signing',
+      };
+      updateTransfer(transfer.id, {
+        signatures,
+        status: updatedTransfer.status,
       });
       logAudit('esign.signed', `${party} signed Transfer Deed via Nafath`);
+      dispatch({ type: 'SET_DEMO_GUIDE', guide: guideAfterSigning(updatedTransfer) });
     },
     [getActiveTransfer, updateTransfer, logAudit]
   );
@@ -522,6 +539,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       status: 'escrow_funded',
     });
     logAudit('escrow.funded', 'Buyer funded Dhamen escrow', `SAR ${transfer.feeBreakdown.dealValue}`);
+    dispatch({ type: 'SET_DEMO_GUIDE', guide: guideAfterEscrowFunded() });
   }, [getActiveTransfer, updateTransfer, logAudit]);
 
   const completeMoci = useCallback(() => {
@@ -541,6 +559,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       'Dhamen escrow released to seller (minus platform fee + VAT)',
       `Fee: SAR ${transfer.feeBreakdown.totalInvoicedToSeller}`
     );
+    dispatch({ type: 'SET_DEMO_GUIDE', guide: guideAfterTransferComplete() });
   }, [getActiveTransfer, updateTransfer, logAudit]);
 
   const triggerBranch = useCallback(
@@ -558,9 +577,23 @@ export function AppProvider({ children }: { children: ReactNode }) {
     []
   );
 
-  const dismissDemoAlert = useCallback(() => {
-    dispatch({ type: 'SET_DEMO_ALERT', alert: null });
+  const setDemoGuide = useCallback((guide: DemoGuide | null) => {
+    dispatch({ type: 'SET_DEMO_GUIDE', guide });
   }, []);
+
+  const dismissDemoGuide = useCallback(() => {
+    dispatch({ type: 'SET_DEMO_GUIDE', guide: null });
+  }, []);
+
+  const followDemoGuide = useCallback(() => {
+    if (!state.demoGuide) return;
+    const { switchToRole, targetStep } = state.demoGuide;
+    dispatch({ type: 'SET_DEMO_GUIDE', guide: null });
+    dispatch({ type: 'SET_ROLE', role: switchToRole });
+    if (targetStep) {
+      dispatch({ type: 'SET_STEP', step: targetStep });
+    }
+  }, [state.demoGuide]);
 
   const simulateBuyerAcceptance = useCallback(() => {
     const transfer = getActiveTransfer();
@@ -568,14 +601,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const buyer = state.persons[transfer.buyerId];
     const buyerName = lang === 'ar' ? buyer?.nameAr : buyer?.nameEn;
     acceptBuyerOffer();
-    dispatch({
-      type: 'SET_DEMO_ALERT',
-      alert: {
-        role: 'seller',
-        messageKey: 'notification.buyer_confirmed',
-        buyerName: buyerName ?? transfer.buyerId,
-      },
-    });
     logAudit('demo.buyer_accepted', 'Buyer accepted transfer offer (simulated)', buyerName);
   }, [getActiveTransfer, state.persons, lang, acceptBuyerOffer, logAudit]);
 
@@ -619,7 +644,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       syncRoleStep,
       jumpToStep,
       simulateBuyerAcceptance,
-      dismissDemoAlert,
+      setDemoGuide,
+      followDemoGuide,
+      dismissDemoGuide,
       getActiveTransfer,
       getPersonName,
       getCompany,
@@ -649,7 +676,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       syncRoleStep,
       jumpToStep,
       simulateBuyerAcceptance,
-      dismissDemoAlert,
+      setDemoGuide,
+      followDemoGuide,
+      dismissDemoGuide,
       getActiveTransfer,
       getPersonName,
       getCompany,

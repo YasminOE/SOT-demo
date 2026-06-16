@@ -1,7 +1,8 @@
-import { Bell, Languages } from 'lucide-react';
+import { Languages } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useApp, useT } from '../../context/AppContext';
 import { PLATFORM_NAME_AR, PLATFORM_NAME_EN } from '../../data/seed';
+import { DemoGuideBanner } from '../DemoGuideBanner';
 import { ProgressTracker } from '../ProgressTracker';
 import { getNavForRole } from './navConfig';
 import { getStepMeta } from './stepMeta';
@@ -21,7 +22,7 @@ const FLOW_STEPS = new Set([
 ]);
 
 export function DashboardShell({ children }: { children: ReactNode }) {
-  const { state, setLanguage, setStep, dismissDemoAlert, getActiveTransfer } = useApp();
+  const { state, setLanguage, setStep, getActiveTransfer } = useApp();
   const t = useT();
   const person = state.persons[state.currentUserId];
   const transfer = getActiveTransfer();
@@ -40,7 +41,6 @@ export function DashboardShell({ children }: { children: ReactNode }) {
     .join('')
     .slice(0, 2)
     .toUpperCase();
-  const hasAlert = state.demoAlert?.role === state.currentRole;
   const showJourney = FLOW_STEPS.has(state.currentStep);
 
   return (
@@ -102,17 +102,6 @@ export function DashboardShell({ children }: { children: ReactNode }) {
               >
                 <Languages className="h-[18px] w-[18px]" strokeWidth={1.75} />
               </button>
-              <button
-                type="button"
-                onClick={() => hasAlert && dismissDemoAlert()}
-                className="relative flex h-9 w-9 items-center justify-center rounded-full text-[var(--apple-text-secondary)] transition-colors hover:bg-[var(--apple-fill-secondary)]"
-                aria-label="Notifications"
-              >
-                <Bell className="h-[18px] w-[18px]" strokeWidth={1.75} />
-                {hasAlert && (
-                  <span className="absolute end-2 top-2 h-2 w-2 rounded-full bg-[var(--apple-green)] ring-2 ring-white" />
-                )}
-              </button>
               <div className="ms-2 flex items-center gap-2.5 rounded-full bg-[var(--apple-fill-secondary)] py-1 pe-1 ps-3">
                 <div className="hidden text-end sm:block">
                   <p className="max-w-[120px] truncate text-[12px] font-medium tracking-[-0.01em] text-[var(--apple-text)]">
@@ -128,6 +117,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
         </header>
 
         <main className="flex-1 px-2">
+          <DemoGuideBanner />
           {showJourney && (
             <div className="od-panel mb-6 px-5 py-4">
               <ProgressTracker variant="compact" />

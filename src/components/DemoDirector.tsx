@@ -4,6 +4,7 @@ import { useApp, useT } from '../context/AppContext';
 import { getRoleSteps } from '../flows/roleFlows';
 import type { Role, TransferStep } from '../types';
 import { Button } from './ui';
+import { AuditTrailPanel } from './AuditTrail';
 
 const ROLES: Role[] = ['seller', 'buyer', 'company_admin', 'platform_admin'];
 
@@ -37,6 +38,7 @@ export function DemoDirector() {
   const t = useT();
   const [open, setOpen] = useState(true);
   const [collapsed, setCollapsed] = useState(false);
+  const [showAudit, setShowAudit] = useState(false);
 
   const roleSteps = useMemo(
     () => getRoleSteps(state.currentRole, state.foEnabled),
@@ -138,6 +140,22 @@ export function DemoDirector() {
                 </option>
               ))}
             </select>
+          </div>
+
+          <div>
+            <button
+              type="button"
+              onClick={() => setShowAudit(!showAudit)}
+              className="mb-1 flex w-full items-center justify-between opacity-70 hover:opacity-100"
+            >
+              <span>{t('demo.audit')}</span>
+              {showAudit ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+            </button>
+            {showAudit && (
+              <div className="overflow-hidden rounded-[10px] bg-black/30">
+                <AuditTrailPanel limit={6} compact internal />
+              </div>
+            )}
           </div>
         </div>
       )}

@@ -3,7 +3,6 @@ import { Plus } from 'lucide-react';
 import { AppProvider, useApp, useT } from './context/AppContext';
 import { Layout } from './components/Layout';
 import { DemoDirector } from './components/DemoDirector';
-import { AuditTrailPanel } from './components/AuditTrail';
 import { PageHeader } from './components/dashboard/PageHeader';
 import { getStepMeta } from './components/dashboard/stepMeta';
 import { canRoleAccessStep, resolveRoleStep } from './flows/roleFlows';
@@ -90,14 +89,7 @@ function RoleFlow() {
           action={headerAction}
         />
       )}
-      <div className={isOnboarding || isDashboard ? '' : 'grid gap-6 xl:grid-cols-3'}>
-        <div className={isOnboarding || isDashboard ? '' : 'xl:col-span-2'}>{page}</div>
-        {!isOnboarding && !isDashboard && (
-          <div className="hidden xl:block">
-            <AuditTrailPanel />
-          </div>
-        )}
-      </div>
+      <div className={isOnboarding || isDashboard ? '' : ''}>{page}</div>
     </>
   );
 }

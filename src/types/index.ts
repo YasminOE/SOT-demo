@@ -1,3 +1,5 @@
+import type { TranslationKey } from '../i18n/translations';
+
 export type Language = 'ar' | 'en';
 export type Role = 'seller' | 'buyer' | 'company_admin' | 'platform_admin' | 'shareholder';
 export type MarketCondition = 'normal' | 'stress' | 'hot';
@@ -148,6 +150,13 @@ export interface Transfer {
   branch?: 'happy' | 'discrepancy' | 'price_out_of_range' | 'rofr_exercised' | 'declined_sign';
 }
 
+export interface DemoGuide {
+  switchToRole: Role;
+  messageKey: TranslationKey;
+  targetStep?: TransferStep;
+  stepKey?: TranslationKey;
+}
+
 export interface AppState {
   language: Language;
   currentRole: Role;
@@ -165,8 +174,8 @@ export interface AppState {
   demoMarketCondition: MarketCondition;
   /** When false, FO step is hidden and validation runs silently */
   foEnabled: boolean;
-  /** Demo-only toast shown to a specific role */
-  demoAlert: { role: Role; messageKey: string; buyerName?: string } | null;
+  /** Demo-only: prompts presenter to switch role for the next step */
+  demoGuide: DemoGuide | null;
 }
 
 export interface DemoDirectorActions {

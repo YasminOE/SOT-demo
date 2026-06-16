@@ -4,6 +4,7 @@ import { useApp, useT } from '../context/AppContext';
 import { Button, Card, StatusChip } from '../components/ui';
 import { formatSAR } from '../utils/fees';
 import { DEMO_ROFR_SHAREHOLDER_ID } from '../data/seed';
+import { guideAfterRofrComplete } from '../utils/demoGuide';
 
 export function CompanyROFRPage() {
   const {
@@ -16,6 +17,7 @@ export function CompanyROFRPage() {
     setStep,
     setRole,
     updateTransfer,
+    setDemoGuide,
   } = useApp();
   const t = useT();
   const transfer = getActiveTransfer();
@@ -45,6 +47,7 @@ export function CompanyROFRPage() {
     if (state.demoBranch !== 'rofr_exercised') {
       updateTransfer(transfer.id, { status: 'signing' });
       setStep('signing');
+      setDemoGuide(guideAfterRofrComplete());
     }
   };
 
