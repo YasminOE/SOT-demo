@@ -18,27 +18,25 @@ export function KpiCard({
 }) {
   const deltaClass =
     deltaTone === 'up'
-      ? 'text-emerald-600'
+      ? 'text-[#248a3d]'
       : deltaTone === 'down'
-        ? 'text-amber-600'
-        : 'text-[var(--od-muted)]';
+        ? 'text-[#c93400]'
+        : 'text-[var(--apple-text-secondary)]';
 
   return (
-    <div className="od-panel p-[18px]">
+    <div className="od-panel p-5">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-[var(--od-muted)]">
-            {label}
-          </p>
-          <p className="mt-2 text-[28px] font-semibold leading-none tracking-[-0.02em] text-[var(--od-heading)]">
+          <p className="apple-caption">{label}</p>
+          <p className="mt-2 text-[32px] font-semibold leading-none tracking-[-0.03em] text-[var(--apple-text)] tabular-nums">
             {value}
           </p>
-          {delta && <p className={`mt-1.5 text-xs ${deltaClass}`}>{delta}</p>}
-          {hint && !delta && <p className="mt-1.5 text-xs text-[var(--od-muted)]">{hint}</p>}
+          {delta && <p className={`mt-2 text-[13px] font-medium tracking-[-0.01em] ${deltaClass}`}>{delta}</p>}
+          {hint && !delta && <p className="mt-2 apple-caption">{hint}</p>}
         </div>
         {Icon && (
-          <div className="rounded-lg bg-[var(--od-accent-soft)] p-2.5 text-[var(--od-accent)]">
-            <Icon className="h-5 w-5" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-[10px] bg-[var(--apple-fill-secondary)] text-[var(--apple-blue)]">
+            <Icon className="h-5 w-5" strokeWidth={1.75} />
           </div>
         )}
       </div>
@@ -62,8 +60,8 @@ export function DashboardPanel({
   return (
     <section className={`od-panel overflow-hidden ${className}`}>
       {title && (
-        <div className="flex items-center justify-between gap-3 border-b border-[var(--od-border)] px-5 py-3.5">
-          <h3 className="text-sm font-medium text-[var(--od-heading)]">{title}</h3>
+        <div className="flex items-center justify-between gap-3 px-5 pb-0 pt-5">
+          <h3 className="apple-headline">{title}</h3>
           {action}
         </div>
       )}
@@ -87,13 +85,13 @@ export function QuickActionTile({
     <button
       type="button"
       onClick={onClick}
-      className={`flex items-center gap-3 rounded-[10px] border px-4 py-3.5 text-start text-sm font-medium transition-colors ${
+      className={`flex items-center gap-3 px-5 py-3.5 text-start text-[14px] font-medium tracking-[-0.01em] transition-all active:scale-[0.98] ${
         primary
-          ? 'border-[var(--od-accent)] bg-[var(--od-accent)] text-white hover:bg-[var(--od-accent-hover)]'
-          : 'od-panel-interactive text-[var(--od-heading)] hover:bg-[var(--od-bg)]'
+          ? 'apple-btn-primary shadow-sm'
+          : 'apple-btn-secondary'
       }`}
     >
-      <Icon className={`h-4 w-4 shrink-0 ${primary ? 'text-white/90' : 'text-[var(--od-muted)]'}`} />
+      <Icon className={`h-[18px] w-[18px] shrink-0 ${primary ? 'text-white' : 'text-[var(--apple-blue)]'}`} strokeWidth={1.75} />
       {label}
     </button>
   );

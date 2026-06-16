@@ -47,7 +47,7 @@ export function DemoDirector() {
     return (
       <button
         onClick={() => setOpen(true)}
-        className="fixed bottom-4 start-4 z-50 rounded-full bg-brand-900 px-4 py-2 text-xs font-medium text-white shadow-lg"
+        className="fixed bottom-4 start-4 z-50 rounded-full bg-[rgba(29,29,31,0.88)] px-4 py-2 text-xs font-medium tracking-[-0.01em] text-white shadow-lg backdrop-blur-xl"
       >
         {t('demo.title')}
       </button>
@@ -55,14 +55,14 @@ export function DemoDirector() {
   }
 
   return (
-    <div className="fixed bottom-4 start-4 z-50 w-72 rounded-xl border border-brand-700 bg-brand-900 text-white shadow-2xl">
-      <div className="flex items-center justify-between border-b border-brand-700 px-3 py-2">
-        <span className="text-xs font-semibold uppercase tracking-wide">{t('demo.title')}</span>
+    <div className="fixed bottom-4 start-4 z-50 w-72 overflow-hidden rounded-[18px] bg-[rgba(29,29,31,0.92)] text-white shadow-2xl backdrop-blur-xl">
+      <div className="flex items-center justify-between border-b border-white/10 px-4 py-2.5">
+        <span className="text-xs font-medium tracking-[-0.01em] text-white/90">{t('demo.title')}</span>
         <div className="flex gap-1">
-          <button onClick={() => setCollapsed(!collapsed)} className="rounded p-1 hover:bg-brand-700">
+          <button onClick={() => setCollapsed(!collapsed)} className="rounded-full p-1 hover:bg-white/10">
             {collapsed ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
           </button>
-          <button onClick={() => setOpen(false)} className="rounded px-2 text-xs hover:bg-brand-700">
+          <button onClick={() => setOpen(false)} className="rounded-full px-2 py-1 text-xs hover:bg-white/10">
             ×
           </button>
         </div>
@@ -77,7 +77,7 @@ export function DemoDirector() {
                 <button
                   key={role}
                   onClick={() => setRole(role)}
-                  className={`rounded px-2 py-1 ${state.currentRole === role ? 'bg-white text-brand-900' : 'bg-brand-700 hover:bg-brand-600'}`}
+                  className={`rounded-full px-2.5 py-1 text-[11px] font-medium ${state.currentRole === role ? 'bg-white text-[#1d1d1f]' : 'bg-white/10 hover:bg-white/15'}`}
                 >
                   {t(`role.${role}` as import('../i18n/translations').TranslationKey)}
                 </button>
@@ -117,7 +117,7 @@ export function DemoDirector() {
                 <button
                   key={branch}
                   onClick={() => triggerBranch(branch)}
-                  className={`rounded px-2 py-1 text-start ${state.demoBranch === branch ? 'bg-amber-400 text-brand-900' : 'bg-brand-700 hover:bg-brand-600'}`}
+                  className={`rounded-full px-2.5 py-1 text-start text-[11px] font-medium ${state.demoBranch === branch ? 'bg-white text-[#1d1d1f]' : 'bg-white/10 hover:bg-white/15'}`}
                 >
                   {t(key)}
                 </button>
@@ -130,7 +130,7 @@ export function DemoDirector() {
             <select
               value={roleSteps.includes(state.currentStep) ? state.currentStep : roleSteps[0]}
               onChange={(e) => jumpToStep(e.target.value as TransferStep)}
-              className="w-full rounded bg-brand-800 px-2 py-1.5 text-white"
+              className="w-full rounded-[10px] border-0 bg-white/10 px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-white/20"
             >
               {roleSteps.map((s) => (
                 <option key={s} value={s}>

@@ -58,14 +58,14 @@ export function StatusChip({
   variant?: 'default' | 'success' | 'warning' | 'danger' | 'info';
 }) {
   const colors = {
-    default: 'bg-slate-100 text-slate-700',
-    success: 'bg-emerald-100 text-emerald-800',
-    warning: 'bg-amber-100 text-amber-800',
-    danger: 'bg-red-100 text-red-800',
-    info: 'bg-blue-100 text-brand-700',
+    default: 'apple-chip apple-chip-default',
+    success: 'apple-chip apple-chip-success',
+    warning: 'apple-chip apple-chip-warning',
+    danger: 'apple-chip apple-chip-danger',
+    info: 'apple-chip apple-chip-info',
   };
   return (
-    <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${colors[variant]}`}>
+    <span className={colors[variant]}>
       {status}
     </span>
   );
@@ -85,9 +85,9 @@ export function Card({
   return (
     <div className={`od-panel overflow-hidden ${className}`}>
       {(title || subtitle) && (
-        <div className="border-b border-[var(--od-border)] px-6 py-4">
-          {title && <h2 className="text-base font-medium text-[var(--od-heading)]">{title}</h2>}
-          {subtitle && <p className="mt-1 text-sm text-[var(--od-muted)]">{subtitle}</p>}
+        <div className="px-6 pb-0 pt-6">
+          {title && <h2 className="apple-headline">{title}</h2>}
+          {subtitle && <p className="apple-subhead mt-1">{subtitle}</p>}
         </div>
       )}
       <div className="p-6">{children}</div>
@@ -111,17 +111,17 @@ export function Button({
   type?: 'button' | 'submit';
 }) {
   const variants = {
-    primary: 'bg-[var(--od-accent)] text-white hover:bg-[var(--od-accent-hover)] disabled:bg-slate-300',
-    secondary: 'border border-[var(--od-border)] bg-white text-[var(--od-heading)] hover:bg-[var(--od-bg)]',
-    danger: 'bg-danger text-white hover:bg-red-700',
-    ghost: 'text-brand-600 hover:bg-brand-50',
+    primary: 'apple-btn-primary px-5 py-2.5 disabled:opacity-40',
+    secondary: 'apple-btn-secondary px-5 py-2.5 disabled:opacity-40',
+    danger: 'rounded-full bg-[var(--apple-red)] px-5 py-2.5 text-white hover:opacity-90 disabled:opacity-40',
+    ghost: 'rounded-full px-4 py-2 text-[var(--apple-blue)] hover:bg-[var(--apple-fill-secondary)]',
   };
   return (
     <button
       type={type}
       onClick={onClick}
       disabled={disabled}
-      className={`inline-flex items-center justify-center rounded-lg px-4 py-2.5 text-sm font-medium transition-colors disabled:cursor-not-allowed ${variants[variant]} ${className}`}
+      className={`inline-flex items-center justify-center text-sm font-medium transition-all disabled:cursor-not-allowed active:scale-[0.98] ${variants[variant]} ${className}`}
     >
       {children}
     </button>
@@ -145,14 +145,14 @@ export function Input({
 }) {
   return (
     <label className="block">
-      <span className="mb-1.5 block text-sm font-medium text-slate-700">{label}</span>
+      <span className="mb-1.5 block text-[13px] font-medium tracking-[-0.01em] text-[var(--apple-text)]">{label}</span>
       <input
         type={type}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         dir={dir}
-        className="w-full rounded-lg border border-border px-3 py-2.5 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100"
+        className="w-full rounded-[10px] border-0 bg-[var(--apple-fill-secondary)] px-3.5 py-2.5 text-[15px] tracking-[-0.01em] text-[var(--apple-text)] placeholder:text-[var(--apple-text-tertiary)] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[var(--apple-blue)]/30"
       />
     </label>
   );
@@ -171,11 +171,11 @@ export function Select({
 }) {
   return (
     <label className="block">
-      <span className="mb-1.5 block text-sm font-medium text-slate-700">{label}</span>
+      <span className="mb-1.5 block text-[13px] font-medium tracking-[-0.01em] text-[var(--apple-text)]">{label}</span>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-lg border border-border px-3 py-2.5 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100"
+        className="w-full rounded-[10px] border-0 bg-[var(--apple-fill-secondary)] px-3.5 py-2.5 text-[15px] tracking-[-0.01em] text-[var(--apple-text)] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[var(--apple-blue)]/30"
       >
         {options.map((o) => (
           <option key={o.value} value={o.value}>

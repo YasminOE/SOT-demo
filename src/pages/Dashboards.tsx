@@ -27,9 +27,9 @@ import type { TranslationKey } from '../i18n/translations';
 
 function WaitingBanner({ message }: { message: string }) {
   return (
-    <div className="od-panel mb-4 flex items-start gap-3 border-amber-200/80 bg-amber-50/50 p-4 text-sm">
-      <Clock className="mt-0.5 h-4 w-4 shrink-0 text-amber-700" />
-      <p className="text-amber-900">{message}</p>
+    <div className="od-panel mb-4 flex items-start gap-3 bg-[rgba(255,149,0,0.08)] p-4">
+      <Clock className="mt-0.5 h-[18px] w-[18px] shrink-0 text-[var(--apple-orange)]" strokeWidth={1.75} />
+      <p className="text-[14px] tracking-[-0.01em] text-[var(--apple-text)]">{message}</p>
     </div>
   );
 }
@@ -44,15 +44,15 @@ function DemoNotification() {
   const message = t(alert.messageKey as TranslationKey).replace('{buyer}', alert.buyerName ?? '');
 
   return (
-    <div className="mb-4 flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm">
-      <Bell className="mt-0.5 h-5 w-5 shrink-0 text-emerald-700" />
+    <div className="od-panel mb-4 flex items-start gap-3 bg-[rgba(52,199,89,0.08)] p-4">
+      <Bell className="mt-0.5 h-[18px] w-[18px] shrink-0 text-[var(--apple-green)]" strokeWidth={1.75} />
       <div className="flex-1">
-        <p className="font-semibold text-emerald-900">{t('notification.title')}</p>
-        <p className="mt-1 text-emerald-800">{message}</p>
+        <p className="text-[14px] font-semibold tracking-[-0.01em] text-[var(--apple-text)]">{t('notification.title')}</p>
+        <p className="apple-subhead mt-1">{message}</p>
       </div>
       <button
         onClick={dismissDemoAlert}
-        className="rounded p-1 text-emerald-700 hover:bg-emerald-100"
+        className="flex h-8 w-8 items-center justify-center rounded-full text-[var(--apple-text-secondary)] hover:bg-[var(--apple-fill-secondary)]"
         aria-label="Dismiss"
       >
         <X className="h-4 w-4" />
@@ -76,25 +76,22 @@ function CertificateBanner({
 }) {
   const t = useT();
   return (
-    <div className="od-panel relative overflow-hidden border-emerald-200/70 bg-emerald-50/30 p-6">
-      <div className="pointer-events-none absolute -end-10 -top-10 h-36 w-36 rounded-full bg-emerald-100/50 blur-2xl" />
-      <div className="relative flex flex-wrap items-center justify-between gap-4">
+    <div className="od-panel relative overflow-hidden p-6">
+      <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-start gap-4">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-700 text-white shadow-sm">
-            <Award className="h-6 w-6" />
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[14px] bg-[var(--apple-green)] text-white">
+            <Award className="h-6 w-6" strokeWidth={1.75} />
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-emerald-700">
-              {t('dash.certificate.ready')}
-            </p>
-            <p className="mt-1 font-semibold text-slate-900">{companyName}</p>
-            <p className="mt-0.5 font-mono text-sm text-brand-700">{certificateId}</p>
-            <p className="mt-1 text-xs text-slate-500">
+            <p className="apple-caption font-medium text-[#248a3d]">{t('dash.certificate.ready')}</p>
+            <p className="apple-headline mt-1">{companyName}</p>
+            <p className="mt-0.5 font-mono text-[13px] text-[var(--apple-blue)]">{certificateId}</p>
+            <p className="apple-caption mt-1">
               {shares.toLocaleString(locale)} {t('transfer.shares').toLowerCase()}
             </p>
           </div>
         </div>
-        <Button onClick={onView} className="gap-2 shadow-sm">
+        <Button onClick={onView} className="gap-2">
           <Download className="h-4 w-4" />
           {t('dash.certificate.view')}
         </Button>
@@ -430,8 +427,8 @@ export function SellerDashboard() {
       </div>
 
       <div>
-        <h2 className="mb-3 text-sm font-medium text-[var(--od-heading)]">{t('dash.cta.quick_actions')}</h2>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <h2 className="apple-headline mb-3">{t('dash.cta.quick_actions')}</h2>
+        <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-4">
           {!company?.wathqVerified && (
             <QuickActionTile
               label={t('dash.cta.register_company')}
@@ -531,7 +528,7 @@ export function SellerTransfersPage() {
             <div className="overflow-x-auto">
               <table className="w-full min-w-[640px] text-sm">
                 <thead>
-                  <tr className="border-b border-slate-100 bg-[var(--od-bg)]/80 text-start od-table-head">
+                  <tr className="border-b border-[var(--apple-separator)] bg-[var(--apple-fill-secondary)] text-start od-table-head">
                     <th className="px-5 py-3">{t('dash.table.ref')}</th>
                     <th className="px-5 py-3">{t('dashboard.seller.company')}</th>
                     <th className="px-5 py-3">{t('dashboard.seller.buyer')}</th>
@@ -568,7 +565,7 @@ export function SellerTransfersPage() {
                       return (
                         <tr
                           key={tr.id}
-                          className="border-b border-slate-50 transition-colors hover:bg-slate-50/50"
+                          className="border-b border-[var(--apple-separator)] transition-colors hover:bg-[var(--apple-fill-secondary)]"
                         >
                           <td className="px-5 py-4 font-mono text-xs text-slate-500">{tr.id}</td>
                           <td className="max-w-[160px] truncate px-5 py-4 font-medium">{coName}</td>
@@ -749,8 +746,8 @@ export function BuyerDashboard() {
       </div>
 
       <div>
-        <h2 className="mb-3 text-sm font-medium text-[var(--od-heading)]">{t('dash.cta.quick_actions')}</h2>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <h2 className="apple-headline mb-3">{t('dash.cta.quick_actions')}</h2>
+        <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-4">
           {canConfirm && (
             <QuickActionTile
               label={t('dash.cta.confirm_offer')}
@@ -856,7 +853,7 @@ export function BuyerOffersPage() {
             <div className="overflow-x-auto">
               <table className="w-full min-w-[640px] text-sm">
                 <thead>
-                  <tr className="border-b border-slate-100 bg-[var(--od-bg)]/80 text-start od-table-head">
+                  <tr className="border-b border-[var(--apple-separator)] bg-[var(--apple-fill-secondary)] text-start od-table-head">
                     <th className="px-5 py-3">{t('dash.table.ref')}</th>
                     <th className="px-5 py-3">{t('dashboard.seller.company')}</th>
                     <th className="px-5 py-3">{t('dash.table.seller')}</th>
